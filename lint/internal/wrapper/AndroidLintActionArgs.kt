@@ -6,14 +6,12 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 internal class AndroidLintActionArgs(
-  rawArgs: Array<String>,
+  parser: ArgParser,
 ) {
 
   private val argsParserPathTransformer: String.() -> Path = {
     Paths.get(this)
   }
-
-  private val parser by lazy { ArgParser(rawArgs.unwrapArgsPath()) }
 
   val moduleName: String by parser.storing(
     names = arrayOf("--module-name"),
@@ -127,15 +125,15 @@ internal class AndroidLintActionArgs(
 
   companion object {
 
-    internal fun parseArgs(args: Array<String>): AndroidLintActionArgs =
-      AndroidLintActionArgs(args)
-  }
+    internal fun parseArgs(args: List<String>): AndroidLintActionArgs {
+      // TODO Need to handle the --flagfile argument here
+      val unwrappedArgs: Array<String> = if (args.size == 1 && args[0].startsWith("@")) {
+        File(args[0].removePrefix("@")).readLines(Charset.defaultCharset()).toTypedArray()
+      } else {
+        args.toTypedArray()
+      }
 
-  private fun Array<String>.unwrapArgsPath(): Array<String> {
-    return if (this.size == 1 && this[0].startsWith("@")) {
-      File(this[0].removePrefix("@")).readLines(Charset.defaultCharset()).toTypedArray()
-    } else {
-      this
+      return AndroidLintActionArgs(ArgParser(unwrappedArgs))
     }
   }
 }

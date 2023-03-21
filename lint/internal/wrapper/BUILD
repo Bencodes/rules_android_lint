@@ -13,6 +13,7 @@ kt_jvm_library(
     srcs = glob(["*.kt"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//lint/internal/worker",
         "@rules_android_lint_dependencies//:com_android_tools_lint_lint",
         "@rules_android_lint_dependencies//:com_android_tools_lint_lint_api",
         "@rules_android_lint_dependencies//:com_android_tools_lint_lint_checks",
