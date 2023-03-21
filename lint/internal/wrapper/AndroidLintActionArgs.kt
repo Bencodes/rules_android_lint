@@ -125,6 +125,11 @@ internal class AndroidLintActionArgs(
     help = "",
   )
 
+  val exitCode: Boolean by parser.flagging(
+    names = arrayOf("--exitcode"),
+    help = "",
+  ).default { true }
+
   companion object {
 
     internal fun parseArgs(args: Array<String>): AndroidLintActionArgs =

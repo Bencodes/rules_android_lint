@@ -92,7 +92,6 @@ internal class AndroidLintRunner {
       projectFilePath.pathString,
       "--xml",
       actionArgs.output.pathString,
-      "--exitcode",
       "--compile-sdk-version",
       actionArgs.compileSdkVersion,
       "--java-language-level",
@@ -121,6 +120,9 @@ internal class AndroidLintRunner {
     if (actionArgs.disableChecks.isNotEmpty()) {
       args.add("--disable")
       args.add(actionArgs.disableChecks.joinToString(","))
+    }
+    if (actionArgs.exitCode) {
+      args.add("--exitcode")
     }
 
     // TODO Use reflection to open this

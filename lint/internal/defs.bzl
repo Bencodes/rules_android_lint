@@ -125,6 +125,10 @@ _ATTRS = {
         default = [],
         doc = "Custom lint rules to run.",
     ),
+    "exit_code": attr.bool(
+        default = True,
+        doc = "When true, lint will error code will be set to -1, and will be 0 otherwise.",
+    ),
 }
 
 def _collect_android_lint_providers(ctx, regenerate):
@@ -234,6 +238,10 @@ def _collect_android_lint_providers(ctx, regenerate):
     # Append the enabled checks
     for check in ctx.attr.enable_checks:
         args.add("--enable-check", check)
+
+    # Append the exit code
+    if ctx.attr.exit_code:
+        args.add("--exitcode")
 
     # Declare the output file
     output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
