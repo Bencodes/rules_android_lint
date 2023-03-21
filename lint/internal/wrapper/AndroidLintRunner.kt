@@ -106,21 +106,21 @@ internal class AndroidLintRunner {
       baselineFilePath.pathString,
     )
     if (actionArgs.warningsAsErrors) {
-      args.plus("-Werror")
+      args.add("-Werror")
     } else {
-      args.plus("--nowarn")
+      args.add("--nowarn")
     }
     if (actionArgs.config != null) {
-      args.plus("--config")
-      args.plus(actionArgs.config!!.pathString)
+      args.add("--config")
+      args.add(actionArgs.config!!.pathString)
     }
     if (actionArgs.enableChecks.isNotEmpty()) {
-      args.plus("--enable")
-      args.plus(actionArgs.enableChecks.joinToString(","))
+      args.add("--enable")
+      args.add(actionArgs.enableChecks.joinToString(","))
     }
     if (actionArgs.disableChecks.isNotEmpty()) {
-      args.plus("--disable")
-      args.plus(actionArgs.disableChecks.joinToString(","))
+      args.add("--disable")
+      args.add(actionArgs.disableChecks.joinToString(","))
     }
 
     // TODO Use reflection to open this
