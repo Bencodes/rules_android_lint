@@ -55,10 +55,6 @@ _ATTRS = {
         cfg = "exec",
         doc = "Test runner executible for validating the output results.",
     ),
-    "_test_runner_template": attr.label(
-        default = "//lint/internal:test_runner_template",
-        allow_single_file = True,
-    ),
     "srcs": attr.label_list(
         mandatory = True,
         allow_files = [".java", ".kt", ".kts"],
@@ -251,10 +247,13 @@ def _collect_android_lint_providers(ctx, regenerate):
         inputs = inputs,
         outputs = outputs,
         executable = ctx.executable._lint_wrapper,
-        execution_requirements = {},
         progress_message = "Running Android Lint {}".format(str(ctx.label)),
         arguments = [args],
         tools = [ctx.executable._lint_wrapper],
+        execution_requirements = {
+            "supports-workers": "1",
+            "requires-worker-protocol": "json",
+        },
     )
 
     return struct(
@@ -269,15 +268,20 @@ def _test_impl(ctx):
     inputs.append(providers.lint_baseline)
     inputs.extend(ctx.attr._test_runner_executable.default_runfiles.files.to_list())
 
-    ctx.actions.expand_template(
-        template = ctx.file._test_runner_template,
+    ctx.actions.write(
         output = ctx.outputs.executable,
-        is_executable = True,
-        substitutions = {
-            "{executable}": ctx.executable._test_runner_executable.short_path,
-            "{lint_baseline}": providers.lint_baseline.short_path,
-            "{regenerate_baseline_files}": "false",
-        },
+        is_executable = False,
+        content = """
+#!/bin/bash
+
+{executable} \
+  --lint_baseline "{lint_baseline}" \
+  --regenerate_baseline_files "{regenerate_baseline_files}"
+        """.format(
+            executable = ctx.executable._test_runner_executable.short_path,
+            lint_baseline = providers.lint_baseline.short_path,
+            regenerate_baseline_files = "false",
+        ),
     )
 
     return [

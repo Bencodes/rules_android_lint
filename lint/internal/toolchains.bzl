@@ -22,11 +22,16 @@ def rules_android_lint_toolchains(lint_version = _LINT_VERSION):
     maven_install(
         name = "rules_android_lint_dependencies",
         artifacts = [
+            # Worker dependencies
+            maven.artifact("com.squareup.moshi", "moshi", "1.14.0"),
+            maven.artifact("com.squareup.moshi", "moshi-kotlin", "1.14.0"),
+            maven.artifact("com.squareup.okio", "okio-jvm", "3.2.0"),
+            maven.artifact("io.reactivex.rxjava3", "rxjava", "3.0.10"),
+            maven.artifact("com.xenomachina", "kotlin-argparser", "2.0.7"),
+            # Testing dependencies
             maven.artifact("junit", "junit", "4.13.2", testonly = True),
             maven.artifact("org.assertj", "assertj-core", "3.24.2", testonly = True),
-            "io.reactivex.rxjava3:rxjava:3.0.10",
-            "com.xenomachina:kotlin-argparser:2.0.7",
-            # TODO These need to be passed in via the toolchain and dynamically
+            # These need to be passed in via the toolchain and dynamically
             "com.android.tools.lint:lint:{}".format(lint_version),
             "com.android.tools.lint:lint-api:{}".format(lint_version),
             "com.android.tools.lint:lint-checks:{}".format(lint_version),
