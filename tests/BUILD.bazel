@@ -1,0 +1,12 @@
+load(":versions_test.bzl", "versions_test_suite")
+
+versions_test_suite(name = "versions_test")
+
+test_suite(
+    name = "tests",
+    tests = [
+        ":versions_test",
+        "//tests/src/cli:tests",
+        "//tests/src/worker:tests",
+    ],
+)

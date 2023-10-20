@@ -1,0 +1,35 @@
+load("@rules_android//android:rules.bzl", "android_library")
+load("@rules_android_lint//rules:defs.bzl", "android_lint", "android_lint_test")
+load("@rules_android_lint//toolchains:toolchain.bzl", "android_lint_toolchain")
+
+android_library(
+    name = "lib",
+    srcs = ["Foo.java"],
+    custom_package = "com.rules.android.lint.examples",
+)
+
+android_lint(
+    name = "lib_lint",
+    srcs = ["Foo.java"],
+    android_lint_config = "lint.xml",
+    lib = ":lib",
+)
+
+android_lint_test(
+    name = "lib_lint_test",
+    srcs = ["Foo.java"],
+    baseline = "lib_lint_test_lint_baseline.xml",
+    lib = ":lib",
+)
+
+android_lint_toolchain(
+    name = "android_lint_default",
+    android_lint_config = "lint_global.xml",
+    visibility = ["//visibility:public"],
+)
+
+toolchain(
+    name = "sample_android_lint_toolchain",
+    toolchain = ":android_lint_default",
+    toolchain_type = "@rules_android_lint//toolchains:toolchain_type",
+)

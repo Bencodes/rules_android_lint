@@ -1,2 +1,2 @@
-lint-tests/
-lint-examples/
+e2e/
+examples/

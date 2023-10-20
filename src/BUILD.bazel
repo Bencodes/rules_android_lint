@@ -1,0 +1,5 @@
+py_binary(
+    name = "android_lint_output_validator",
+    srcs = ["android_lint_output_validator.py"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,19 @@
+module(
+    name = "examples_simple",
+    version = "TODO",
+)
+
+register_toolchains("//:sample_android_lint_toolchain")
+
+bazel_dep(name = "rules_android_lint")
+local_path_override(
+    module_name = "rules_android_lint",
+    path = "../../",
+)
+
+bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "rules_android", version = "0.1.1")
+bazel_dep(name = "rules_jvm_external", version = "5.3")
+
+remote_android_extensions = use_extension("@bazel_tools//tools/android:android_extensions.bzl", "remote_android_tools_extensions")
+use_repo(remote_android_extensions, "android_gmaven_r8", "android_tools")

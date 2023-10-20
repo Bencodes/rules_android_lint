@@ -1,0 +1,11 @@
+load("@rules_kotlin//kotlin:lint.bzl", "ktlint_config")
+
+exports_files(["maven_install.json"])
+
+ktlint_config(
+    name = "editorconfig",
+    android_rules_enabled = False,
+    editorconfig = "//:.editorconfig",
+    experimental_rules_enabled = False,
+    visibility = ["//visibility:public"],
+)

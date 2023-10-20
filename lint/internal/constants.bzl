@@ -1,3 +1,0 @@
-"""
-Lint CLI constants
-"""

@@ -1,0 +1,104 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+# For stardoc to reference the files
+exports_files(["defs.bzl"])
+
+bzl_library(
+    name = "rules",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":android_lint",
+        ":android_lint_test",
+        ":defs",
+        ":extensions",
+        ":providers",
+    ],
+)
+
+bzl_library(
+    name = "providers",
+    srcs = ["providers.bzl"],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+    ],
+)
+
+bzl_library(
+    name = "utils",
+    srcs = ["utils.bzl"],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "defs",
+    srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":android_lint",
+        ":android_lint_test",
+        ":utils",
+        "//toolchains:toolchain",
+    ],
+)
+
+bzl_library(
+    name = "extensions",
+    srcs = ["extensions.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [":repositories"],
+)
+
+bzl_library(
+    name = "attrs",
+    srcs = ["attrs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":collect_aar_outputs_aspect",
+    ],
+)
+
+bzl_library(
+    name = "impl",
+    srcs = ["impl.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":collect_aar_outputs_aspect",
+        "@bazel_skylib//lib:dicts",
+    ],
+)
+
+bzl_library(
+    name = "android_lint",
+    srcs = ["android_lint.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":attrs",
+        ":impl",
+        ":providers",
+    ],
+)
+
+bzl_library(
+    name = "android_lint_test",
+    srcs = ["android_lint_test.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":attrs",
+        ":impl",
+        ":providers",
+    ],
+)
+
+bzl_library(
+    name = "collect_aar_outputs_aspect",
+    srcs = ["collect_aar_outputs_aspect.bzl"],
+    visibility = ["//visibility:public"],
+)
