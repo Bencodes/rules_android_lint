@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        bzlmod: [true, false]
+        bzlmod: [true]
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout the sources"
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        bzlmod: [true, false]
+        bzlmod: [true]
         directory: [examples/simple-android]
     runs-on: ${{ matrix.os }}
     steps:
