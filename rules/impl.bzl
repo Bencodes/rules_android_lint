@@ -33,7 +33,8 @@ def _run_android_lint(
         disable_checks,
         enable_checks,
         autofix,
-        regenerate):
+        regenerate,
+        android_lint_enable_check_dependencies):
     """Constructs the Android Lint actions
 
     Args:
@@ -55,6 +56,7 @@ def _run_android_lint(
         enable_checks: List of additional checks to enable
         autofix: Whether to autofix (This is a no-op feature right now)
         regenerate: Whether to regenerate the baseline files
+        android_lint_enable_check_dependencies: Enables dependency checking during analysis
     """
     inputs = []
     outputs = [output]
@@ -102,6 +104,8 @@ def _run_android_lint(
     for dep in classpath_deps:
         args.add("--classpath", dep)
     inputs.extend(classpath_deps)
+    if android_lint_enable_check_dependencies:
+        args.add("--enable-check-dependencies")
 
     # Declare the output file
     output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
@@ -206,6 +210,7 @@ def process_android_lint_issues(ctx, regenerate):
         enable_checks = ctx.attr.enable_checks,
         autofix = ctx.attr.autofix,
         regenerate = regenerate,
+        android_lint_enable_check_dependencies = _utils.get_android_lint_toolchain(ctx).android_lint_enable_check_dependencies,
     )
 
     return struct(

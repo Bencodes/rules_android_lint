@@ -46,6 +46,7 @@ class AndroidLintActionArgsTest {
         "1.7",
         "--kotlin-language-level",
         "1.8",
+        "--enable-check-dependencies",
       ),
     )
 
@@ -66,5 +67,6 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.compileSdkVersion).isEqualTo("1.6")
     assertThat(parseArgs.javaLanguageLevel).isEqualTo("1.7")
     assertThat(parseArgs.kotlinLanguageLevel).isEqualTo("1.8")
+    assertThat(parseArgs.enableCheckDependencies).isTrue()
   }
 }

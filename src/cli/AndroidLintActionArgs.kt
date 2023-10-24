@@ -108,6 +108,11 @@ internal class AndroidLintActionArgs(
     help = "",
   )
 
+  val enableCheckDependencies: Boolean by parser.flagging(
+    names = arrayOf("--enable-check-dependencies"),
+    help = "",
+  ).default { false }
+
   companion object {
 
     internal fun parseArgs(args: List<String>): AndroidLintActionArgs {
