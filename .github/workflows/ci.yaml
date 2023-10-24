@@ -16,46 +16,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        bzlmod: [true]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout the sources"
         uses: actions/checkout@v4
-      - name: "Install JDK 11"
-        uses: actions/setup-java@v3
-        with:
-          distribution: "zulu"
-          java-version: "11"
       - name: Mount bazel caches
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/bazel
-          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE') }}
+          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
           restore-keys: bazel-cache-
       - name: "Setup Bazelisk"
         uses: bazelbuild/setup-bazelisk@v2
       - name: "Running tests //..."
-        run: bazel test //... --enable_bzlmod=true
+        run: bazel test //... --enable_bzlmod=${{ matrix.bzlmod }}
   integration-tests:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        bzlmod: [true]
+        directory: [examples/simple-android]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout the sources"
         uses: actions/checkout@v4
-      - name: "Install JDK 11"
-        uses: actions/setup-java@v3
-        with:
-          distribution: "zulu"
-          java-version: "11"
       - name: Mount bazel caches
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/bazel
-          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE') }}
+          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
           restore-keys: bazel-cache-
       - name: "Setup Bazelisk"
         uses: bazelbuild/setup-bazelisk@v2
-      - name: "Running integration tests examples/simple-android"
-        working-directory: examples/simple-android
-        run: bazel test //... --enable_bzlmod=true
+      - name: "Running integration tests ${{ matrix.directory }}"
+        working-directory: ${{ matrix.directory }}
+        run: bazel test //... --enable_bzlmod=${{ matrix.bzlmod }}
