@@ -1,1 +1,7 @@
-# Marker that this is the root of a Bazel workspace.
+load("//rules:repositories.bzl", "rules_android_lint_dependencies")
+
+rules_android_lint_dependencies()
+
+load("//rules:setup.bzl", "rules_android_lint_setup")
+
+rules_android_lint_setup()
