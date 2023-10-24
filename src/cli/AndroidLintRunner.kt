@@ -131,19 +131,17 @@ internal class AndroidLintRunner {
     // TODO(bencodes) Use reflection to open this so that the lint version
     // can be dynamically set by the toolchain.
     val main = Main()
-    disableDependenciesCheck(main)
+    disableDependenciesCheck(main, actionArgs.enableCheckDependencies)
     return main.run(args.toTypedArray())
   }
 
-  // A reflection hack for forcing lint to not run against transitive dependencies
-  // TODO(bencodes) Allow this to be toggled from the toolchain
-  private fun disableDependenciesCheck(lintMain: Main) {
+  private fun disableDependenciesCheck(lintMain: Main, enableCheckDependencies: Boolean) {
     val mainClass = Class.forName("com.android.tools.lint.Main")
     val lintCliFlagsField = mainClass.getDeclaredField("flags")
     lintCliFlagsField.isAccessible = true
 
     val lintCliFlags = lintCliFlagsField.get(lintMain) as LintCliFlags
-    lintCliFlags.isCheckDependencies = false
+    lintCliFlags.isCheckDependencies = enableCheckDependencies
   }
 
   /**
