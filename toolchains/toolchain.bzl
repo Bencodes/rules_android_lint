@@ -1,7 +1,7 @@
 """Android Lint Toolchain."""
 
 _ATTRS = dict(
-    enable_check_dependencies = attr.bool(
+    android_lint_enable_check_dependencies = attr.bool(
         default = False,
         doc = """Enables the dependency analysis features within lint. Warning: This feature is extremely
         expensive and will slow down Lint. It's recommended that you leave this feature disabled unless it's
