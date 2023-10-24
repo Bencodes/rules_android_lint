@@ -15,6 +15,12 @@ internal class AndroidLintActionArgs(
     Paths.get(this)
   }
 
+  val androidLintCliTool: Path by parser.storing(
+    names = arrayOf("--android-lint-cli-tool"),
+    help = "",
+    transform = argsParserPathTransformer,
+  )
+
   val label: String by parser.storing(
     names = arrayOf("--label"),
     help = "",

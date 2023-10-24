@@ -1,0 +1,13 @@
+load("@rules_java//java:defs.bzl", "java_binary")
+
+java_binary(
+    name = "com_android_tools_lint_lint",
+    main_class = "com.android.tools.lint.Main",
+    visibility = ["//visibility:public"],
+    runtime_deps = [
+        "@rules_android_lint_deps//:com_android_tools_lint_lint",
+        "@rules_android_lint_deps//:com_android_tools_lint_lint_api",
+        "@rules_android_lint_deps//:com_android_tools_lint_lint_checks",
+        "@rules_android_lint_deps//:com_android_tools_lint_lint_model",
+    ],
+)
