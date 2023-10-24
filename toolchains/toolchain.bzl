@@ -8,6 +8,15 @@ _ATTRS = dict(
         explicitly required.
         """,
     ),
+    android_lint_skip_bytecode_verifier = attr.bool(
+        default = False,
+        doc = """Enables bytecode verification inside of Android Lint. Jars that fail bytecode verification
+        may be quietly excluded.
+
+        Enabling this may be necessary if Lint rule jars
+        are being included that are compiled using a newer JDK.
+        """,
+    ),
     compile_sdk_version = attr.string(
         default = "34",
         doc = "The Android SDK version to compile against.",

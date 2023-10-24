@@ -34,7 +34,8 @@ def _run_android_lint(
         enable_checks,
         autofix,
         regenerate,
-        android_lint_enable_check_dependencies):
+        android_lint_enable_check_dependencies,
+        android_lint_skip_bytecode_verifier):
     """Constructs the Android Lint actions
 
     Args:
@@ -57,6 +58,7 @@ def _run_android_lint(
         autofix: Whether to autofix (This is a no-op feature right now)
         regenerate: Whether to regenerate the baseline files
         android_lint_enable_check_dependencies: Enables dependency checking during analysis
+        android_lint_skip_bytecode_verifier: Disables bytecode verification
     """
     inputs = []
     outputs = [output]
@@ -127,7 +129,7 @@ def _run_android_lint(
         },
         env = {
             # https://googlesamples.github.io/android-custom-lint-rules/usage/variables.md.html
-            "ANDROID_LINT_SKIP_BYTECODE_VERIFIER": "true",
+            "ANDROID_LINT_SKIP_BYTECODE_VERIFIER": ("true" if android_lint_skip_bytecode_verifier else "false"),
         },
     )
 
@@ -211,6 +213,7 @@ def process_android_lint_issues(ctx, regenerate):
         autofix = ctx.attr.autofix,
         regenerate = regenerate,
         android_lint_enable_check_dependencies = _utils.get_android_lint_toolchain(ctx).android_lint_enable_check_dependencies,
+        android_lint_skip_bytecode_verifier = _utils.get_android_lint_toolchain(ctx).android_lint_skip_bytecode_verifier,
     )
 
     return struct(
