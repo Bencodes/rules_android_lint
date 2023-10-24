@@ -1,7 +1,5 @@
 package com.rules.android.lint.cli
 
-import com.android.tools.lint.LintCliFlags
-import com.android.tools.lint.Main
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
@@ -17,7 +15,10 @@ import kotlin.io.path.writeText
 
 internal class AndroidLintRunner {
 
-  internal fun runAndroidLint(args: AndroidLintActionArgs, workingDirectory: Path): Int {
+  internal fun runAndroidLint(
+    args: AndroidLintActionArgs,
+    workingDirectory: Path,
+  ): Int {
     // Create the input baseline file. This is either a copy of the existing baseline
     // or a new temp one that can be written to
     val baselineFile = workingDirectory.resolve("${args.label}_lint_baseline")
@@ -57,7 +58,12 @@ internal class AndroidLintRunner {
     )
 
     // Run Android Lint
-    val exitCode = runAndroidLintCLI(args, projectFile, baselineFile)
+    val exitCode = invokeAndroidLintCLI(
+      invoker = AndroidLintCliInvoker(classLoader = this.javaClass.classLoader),
+      actionArgs = args,
+      projectFilePath = projectFile,
+      baselineFilePath = baselineFile,
+    )
 
     // Pure hacks to strip the relative paths and exec roots out of the file
     // locations. Lint doesn't offer any way to disable this and if we parse-and-transform the
@@ -78,15 +84,16 @@ internal class AndroidLintRunner {
      * 100 ->   Internal continue.
      */
     return when (exitCode) {
-      LintCliFlags.ERRNO_SUCCESS,
-      LintCliFlags.ERRNO_CREATED_BASELINE,
+      AndroidLintCliInvoker.ERRNO_SUCCESS,
+      AndroidLintCliInvoker.ERRNO_CREATED_BASELINE,
       -> 0
 
       else -> exitCode
     }
   }
 
-  private fun runAndroidLintCLI(
+  private fun invokeAndroidLintCLI(
+    invoker: AndroidLintCliInvoker,
     actionArgs: AndroidLintActionArgs,
     projectFilePath: Path,
     baselineFilePath: Path,
@@ -128,20 +135,8 @@ internal class AndroidLintRunner {
       args.add(actionArgs.disableChecks.joinToString(","))
     }
 
-    // TODO(bencodes) Use reflection to open this so that the lint version
-    // can be dynamically set by the toolchain.
-    val main = Main()
-    disableDependenciesCheck(main, actionArgs.enableCheckDependencies)
-    return main.run(args.toTypedArray())
-  }
-
-  private fun disableDependenciesCheck(lintMain: Main, enableCheckDependencies: Boolean) {
-    val mainClass = Class.forName("com.android.tools.lint.Main")
-    val lintCliFlagsField = mainClass.getDeclaredField("flags")
-    lintCliFlagsField.isAccessible = true
-
-    val lintCliFlags = lintCliFlagsField.get(lintMain) as LintCliFlags
-    lintCliFlags.isCheckDependencies = enableCheckDependencies
+    invoker.setCheckDependencies(actionArgs.enableCheckDependencies)
+    return invoker.invoke(args.toTypedArray())
   }
 
   /**
