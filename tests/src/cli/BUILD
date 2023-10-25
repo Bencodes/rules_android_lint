@@ -1,5 +1,6 @@
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_test")
 load("@rules_kotlin//kotlin:lint.bzl", "ktlint_fix", "ktlint_test")
+load("//rules:defs.bzl", "android_lint_test")
 
 kt_jvm_test(
     name = "AndroidLintActionArgsTest",
@@ -10,6 +11,13 @@ kt_jvm_test(
         "@rules_android_lint_deps//:junit_junit",
         "@rules_android_lint_deps//:org_assertj_assertj_core",
     ],
+)
+
+android_lint_test(
+    name = "AndroidLintActionArgsTest_lint_test",
+    srcs = ["AndroidLintActionArgsTest.kt"],
+    lib = ":AndroidLintActionArgsTest",
+    visibility = ["//visibility:private"],
 )
 
 kt_jvm_test(
@@ -23,6 +31,13 @@ kt_jvm_test(
     ],
 )
 
+android_lint_test(
+    name = "AndroidLintActionTest_lint_test",
+    srcs = ["AndroidLintActionTest.kt"],
+    lib = ":AndroidLintActionTest",
+    visibility = ["//visibility:private"],
+)
+
 kt_jvm_test(
     name = "AndroidLintProjectTest",
     srcs = ["AndroidLintProjectTest.kt"],
@@ -34,6 +49,13 @@ kt_jvm_test(
     ],
 )
 
+android_lint_test(
+    name = "AndroidLintProjectTest_lint_test",
+    srcs = ["AndroidLintProjectTest.kt"],
+    lib = ":AndroidLintProjectTest",
+    visibility = ["//visibility:private"],
+)
+
 kt_jvm_test(
     name = "AndroidLintBaselineSanitizerTest",
     srcs = ["AndroidLintBaselineSanitizerTest.kt"],
@@ -43,6 +65,13 @@ kt_jvm_test(
         "@rules_android_lint_deps//:junit_junit",
         "@rules_android_lint_deps//:org_assertj_assertj_core",
     ],
+)
+
+android_lint_test(
+    name = "AndroidLintBaselineSanitizerTest_lint_test",
+    srcs = ["AndroidLintBaselineSanitizerTest.kt"],
+    lib = ":AndroidLintBaselineSanitizerTest",
+    visibility = ["//visibility:private"],
 )
 
 ktlint_test(
