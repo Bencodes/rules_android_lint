@@ -4,8 +4,6 @@
 
 This repository contains Bazel rules for running Android Lint.
 
-These rules are currently in alpha and the APIs are subject to change.
-
 ## Features
 
 - Running Android Lint on Android, Kotlin, and JVM targets
