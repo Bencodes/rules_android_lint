@@ -64,6 +64,7 @@ internal class AndroidLintRunner {
       actionArgs = args,
       projectFilePath = projectFile,
       baselineFilePath = baselineFile,
+      cacheDirectoryPath = workingDirectory.resolve("android-cache"),
     )
 
     // Pure hacks to strip the relative paths and exec roots out of the file
@@ -87,6 +88,7 @@ internal class AndroidLintRunner {
     actionArgs: AndroidLintActionArgs,
     projectFilePath: Path,
     baselineFilePath: Path,
+    cacheDirectoryPath: Path,
   ): Int {
     val args = mutableListOf(
       "--project",
@@ -106,6 +108,8 @@ internal class AndroidLintRunner {
       "--baseline",
       baselineFilePath.pathString,
       "--update-baseline",
+      "--cache-dir",
+      cacheDirectoryPath.pathString,
     )
     if (actionArgs.warningsAsErrors) {
       args.add("-Werror")
