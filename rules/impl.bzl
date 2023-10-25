@@ -129,6 +129,7 @@ def _run_android_lint(
         toolchain = _ANDROID_LINT_TOOLCHAIN_TYPE,
         execution_requirements = {
             "supports-workers": "1",
+            "supports-multiplex-workers": "1",
             "requires-worker-protocol": "json",
         },
         env = {
