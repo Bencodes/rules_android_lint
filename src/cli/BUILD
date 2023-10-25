@@ -15,10 +15,6 @@ kt_jvm_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/worker",
-        "@rules_android_lint_deps//:com_android_tools_lint_lint",
-        "@rules_android_lint_deps//:com_android_tools_lint_lint_api",
-        "@rules_android_lint_deps//:com_android_tools_lint_lint_checks",
-        "@rules_android_lint_deps//:com_android_tools_lint_lint_model",
         "@rules_android_lint_deps//:com_xenomachina_kotlin_argparser",
     ],
 )

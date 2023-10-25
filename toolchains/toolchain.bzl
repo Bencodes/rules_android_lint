@@ -1,6 +1,12 @@
 """Android Lint Toolchain."""
 
 _ATTRS = dict(
+    android_lint = attr.label(
+        default = Label("//third_party:com_android_tools_lint_lint_deploy.jar"),
+        doc = "The Android Lint deploy jar",
+        allow_single_file = True,
+        cfg = "exec",
+    ),
     android_lint_enable_check_dependencies = attr.bool(
         default = False,
         doc = """Enables the dependency analysis features within lint. Warning: This feature is extremely

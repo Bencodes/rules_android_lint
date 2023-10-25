@@ -17,6 +17,7 @@ load(
 
 def _run_android_lint(
         ctx,
+        android_lint,
         module_name,
         output,
         srcs,
@@ -40,6 +41,7 @@ def _run_android_lint(
 
     Args:
         ctx: The target context
+        android_lint: The Android Lint binary to use
         module_name: The name of the module
         output: The output file
         srcs: The source files
@@ -67,6 +69,8 @@ def _run_android_lint(
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
 
+    args.add("--android-lint-cli-tool", android_lint)
+    inputs.append(android_lint)
     args.add("--label", "{}".format(module_name))
     if compile_sdk_version:
         args.add("--compile-sdk-version", compile_sdk_version)
@@ -195,6 +199,7 @@ def process_android_lint_issues(ctx, regenerate):
     output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
     _run_android_lint(
         ctx,
+        android_lint = _utils.only(_utils.list_or_depset_to_list(_utils.get_android_lint_toolchain(ctx).android_lint.files)),
         module_name = _get_module_name(ctx),
         output = output,
         srcs = ctx.files.srcs,

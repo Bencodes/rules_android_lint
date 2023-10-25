@@ -15,6 +15,8 @@ class AndroidLintActionArgsTest {
       args = listOf(
         "--label",
         "test",
+        "--android-lint-cli-tool",
+        "path/to/cli.jar",
         "--src",
         "path/to/Foo.kt",
         "--output",

@@ -58,8 +58,9 @@ internal class AndroidLintRunner {
     )
 
     // Run Android Lint
+    val invoker = AndroidLintCliInvoker.createUsingJars(jars = arrayOf(args.androidLintCliTool))
     val exitCode = invokeAndroidLintCLI(
-      invoker = AndroidLintCliInvoker(classLoader = this.javaClass.classLoader),
+      invoker = invoker,
       actionArgs = args,
       projectFilePath = projectFile,
       baselineFilePath = baselineFile,
@@ -72,17 +73,6 @@ internal class AndroidLintRunner {
       .run { AndroidLintBaselineSanitizer.sanitize(this) }
     args.output.writeText(sanitizedContent)
 
-    /*
-     * Exit Status:
-     * 0   ->   Success.
-     * 1   ->   Lint errors detected.
-     * 2   ->   Lint usage.
-     * 3   ->   Cannot clobber existing file.
-     * 4   ->   Lint help.
-     * 5   ->   Invalid command-line argument.
-     * 6   ->   Created baseline file.
-     * 100 ->   Internal continue.
-     */
     return when (exitCode) {
       AndroidLintCliInvoker.ERRNO_SUCCESS,
       AndroidLintCliInvoker.ERRNO_CREATED_BASELINE,
