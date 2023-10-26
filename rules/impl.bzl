@@ -78,10 +78,10 @@ def _run_android_lint(
         args.add("--java-language-level", java_language_level)
     if kotlin_language_level:
         args.add("--kotlin-language-level", kotlin_language_level)
-    for src in srcs:
+    for src in _utils.list_or_depset_to_list(srcs):
         args.add("--src", src)
         inputs.append(src)
-    for resource_file in resource_files:
+    for resource_file in _utils.list_or_depset_to_list(resource_files):
         args.add("--resource", resource_file)
         inputs.append(resource_file)
     if manifest:
@@ -97,7 +97,7 @@ def _run_android_lint(
         inputs.append(config)
     if warnings_as_errors:
         args.add("--warnings-as-errors")
-    for custom_rule in custom_rules:
+    for custom_rule in _utils.list_or_depset_to_list(custom_rules):
         args.add("--custom-rule", custom_rule)
         inputs.append(custom_rule)
     if autofix == True:
