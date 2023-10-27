@@ -113,7 +113,6 @@ def _run_android_lint(
         args.add("--enable-check-dependencies")
 
     # Declare the output file
-    output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
     args.add("--output", output)
     outputs.append(output)
 
