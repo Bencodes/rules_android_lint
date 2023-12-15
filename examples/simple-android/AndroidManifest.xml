@@ -4,4 +4,10 @@
 
     <uses-sdk android:minSdkVersion="23"/>
 
+    <application>
+        <activity
+            android:name=".TestActivity"
+            android:exported="true" />
+    </application>
+
 </manifest>
