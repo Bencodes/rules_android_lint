@@ -2,6 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.rules.android.lint.examples">
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
     <uses-sdk android:minSdkVersion="23"/>
+
+    <application>
+        <activity
+            android:name=".TestActivity"
+            android:exported="true" />
+    </application>
 
 </manifest>

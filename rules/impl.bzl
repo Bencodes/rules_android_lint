@@ -24,6 +24,7 @@ def _run_android_lint(
         deps,
         resource_files,
         manifest,
+        merged_manifest,
         compile_sdk_version,
         java_language_level,
         kotlin_language_level,
@@ -87,6 +88,9 @@ def _run_android_lint(
     if manifest:
         args.add("--android-manifest", manifest)
         inputs.append(manifest)
+    if merged_manifest:
+        args.add("--android-merged-manifest", merged_manifest)
+        inputs.append(merged_manifest)
     if not regenerate and baseline:
         args.add("--baseline-file", baseline)
         inputs.append(baseline)
@@ -173,6 +177,10 @@ def process_android_lint_issues(ctx, regenerate):
         manifest = ctx.actions.declare_file("AndroidManifest.xml")
         ctx.actions.symlink(output = manifest, target_file = ctx.file.manifest)
 
+    merged_manifest = None
+    if ctx.attr.lib and AndroidManifestInfo in ctx.attr.lib and AndroidBinaryData in ctx.attr.lib:
+        merged_manifest = ctx.attr.lib[AndroidManifestInfo].manifest
+
     # Collect the transitive classpath jars to run lint against.
     deps = []
     for dep in ctx.attr.deps:
@@ -207,6 +215,7 @@ def process_android_lint_issues(ctx, regenerate):
         deps = depset(transitive = deps),
         resource_files = ctx.files.resource_files,
         manifest = manifest,
+        merged_manifest = merged_manifest,
         compile_sdk_version = _utils.get_android_lint_toolchain(ctx).compile_sdk_version,
         java_language_level = _utils.get_android_lint_toolchain(ctx).java_language_level,
         kotlin_language_level = _utils.get_android_lint_toolchain(ctx).kotlin_language_level,

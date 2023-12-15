@@ -16,6 +16,7 @@ internal fun createProjectXMLString(
   srcs: List<Path>,
   resources: List<Path>,
   androidManifest: Path?,
+  androidMergedManifest: Path?,
   classpathJars: List<Path>,
   classpathAars: List<Path>,
   classpathExtractedAarDirectories: List<Pair<Path, Path>>,
@@ -61,6 +62,12 @@ internal fun createProjectXMLString(
   if (androidManifest != null) {
     val element = document.createElement("manifest")
     element.setAttribute("file", androidManifest.pathString)
+    moduleElement.appendChild(element)
+  }
+
+  if (androidMergedManifest != null) {
+    val element = document.createElement("merged-manifest")
+    element.setAttribute("file", androidMergedManifest.pathString)
     moduleElement.appendChild(element)
   }
 

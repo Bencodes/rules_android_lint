@@ -50,6 +50,12 @@ internal class AndroidLintActionArgs(
     transform = argsParserPathTransformer,
   ).default { null }
 
+  val androidMergedManifest: Path? by parser.storing(
+    names = arrayOf("--android-merged-manifest"),
+    help = "Merged android manifest for Android Binary targets",
+    transform = argsParserPathTransformer,
+  ).default { null }
+
   val baselineFile: Path? by parser.storing(
     names = arrayOf("--baseline-file"),
     help = "",
