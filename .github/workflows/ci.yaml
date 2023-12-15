@@ -21,6 +21,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         bzlmod: [true]
+        bazel_version: ["6.4.0", "7.0.0"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout the sources"
@@ -35,6 +36,8 @@ jobs:
       - name: "Setup Bazelisk"
         uses: bazelbuild/setup-bazelisk@v2
       - name: "Running tests //..."
+        env:
+          USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
         run: bazel test //... --enable_bzlmod=${{ matrix.bzlmod }}
   integration-tests:
     strategy:
@@ -43,6 +46,7 @@ jobs:
         bzlmod: [true]
         directory: [examples/simple-android]
         strategy: [local, worker]
+        bazel_version: ["6.4.0", "7.0.0"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout the sources"
@@ -57,5 +61,7 @@ jobs:
       - name: "Setup Bazelisk"
         uses: bazelbuild/setup-bazelisk@v2
       - name: "Running integration tests ${{ matrix.directory }}"
+        env:
+          USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
         working-directory: ${{ matrix.directory }}
         run: bazel test //... --enable_bzlmod=${{ matrix.bzlmod }} --strategy=AndroidLint=${{ matrix.strategy }}
