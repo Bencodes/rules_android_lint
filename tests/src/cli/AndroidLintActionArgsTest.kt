@@ -74,6 +74,6 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.enableCheckDependencies).isTrue()
     assertThat(parseArgs.androidManifest).isEqualTo(Paths.get("AndroidManifest.xml"))
     assertThat(parseArgs.androidMergedManifest)
-      .isEqualTo(Paths.get("/processed/AndroidManifest.xml"))
+      .isEqualTo(Paths.get("processed/AndroidManifest.xml"))
   }
 }
