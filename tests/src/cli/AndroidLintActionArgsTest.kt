@@ -25,6 +25,8 @@ class AndroidLintActionArgsTest {
         "path/to/resource/strings.xml",
         "--android-manifest",
         "AndroidManifest.xml",
+        "--android-merged-manifest",
+        "processed/AndroidManifest.xml",
         "--baseline-file",
         "lib_lint_baseline.xml",
         "--config-file",
@@ -70,5 +72,8 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.javaLanguageLevel).isEqualTo("1.7")
     assertThat(parseArgs.kotlinLanguageLevel).isEqualTo("1.8")
     assertThat(parseArgs.enableCheckDependencies).isTrue()
+    assertThat(parseArgs.androidManifest).isEqualTo(Paths.get("AndroidManifest.xml"))
+    assertThat(parseArgs.androidMergedManifest)
+      .isEqualTo(Paths.get("processed/AndroidManifest.xml"))
   }
 }

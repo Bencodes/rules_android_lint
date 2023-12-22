@@ -19,12 +19,13 @@ class AndroidLintProjectTest {
 
   @Test
   fun `test asXMLString does produce correct project file content`() {
+    val manifest = tmpDirectory.newPath("AndroidManifest.xml")
     assertThat(
       createProjectXMLString(
         moduleName = "test_module_name",
         srcs = listOf(tmpDirectory.newPath("Foo.kt")),
         resources = listOf(tmpDirectory.newPath("foo.xml")),
-        androidManifest = tmpDirectory.newPath("AndroidManifest.xml"),
+        androidManifest = manifest,
         classpathJars = listOf(tmpDirectory.newPath("Foo.jar")),
         classpathAars = listOf(tmpDirectory.newPath("Foo.aar")),
         classpathExtractedAarDirectories = listOf(
@@ -34,6 +35,7 @@ class AndroidLintProjectTest {
           ),
         ),
         customLintChecks = listOf(tmpDirectory.newPath("tmp/unpacked_aars/bar/lint.jar")),
+        androidMergedManifest = manifest,
       ),
     ).isEqualTo(
       """
@@ -43,6 +45,7 @@ class AndroidLintProjectTest {
           <src file="{root}/Foo.kt"/>
           <resource file="{root}/foo.xml"/>
           <manifest file="{root}/AndroidManifest.xml"/>
+          <merged-manifest file="{root}/AndroidManifest.xml"/>
           <classpath jar="{root}/Foo.jar"/>
           <aar file="{root}/Foo.aar"/>
           <aar extracted="{root}/tmp/unpacked_aars/bar" file="{root}/Bar.aar"/>
