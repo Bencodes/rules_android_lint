@@ -49,6 +49,7 @@ def _run_android_lint(
         deps: Depset of aars and jars to include on the classpath
         resource_files: The Android resource files
         manifest: The Android manifest file
+        merged_manifest: The Android merged manifest file (only for android_binary targets)
         compile_sdk_version: The Android compile SDK version
         java_language_level: The Java language level
         kotlin_language_level: The Kotlin language level
