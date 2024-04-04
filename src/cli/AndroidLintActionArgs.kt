@@ -38,6 +38,12 @@ internal class AndroidLintActionArgs(
     transform = argsParserPathTransformer,
   )
 
+  val htmlOutput: Path by parser.storing(
+    names = arrayOf("--html-output"),
+    help = "",
+    transform = argsParserPathTransformer,
+  )
+
   val resources: List<Path> by parser.adding(
     names = arrayOf("--resource"),
     help = "",
