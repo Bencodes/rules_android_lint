@@ -58,13 +58,15 @@ internal class AndroidLintRunner {
     )
 
     // Run Android Lint
+    val androidCacheFolder = workingDirectory.resolve("android-cache")
+    Files.createDirectory(androidCacheFolder)
     val invoker = AndroidLintCliInvoker.createUsingJars(jars = arrayOf(args.androidLintCliTool))
     val exitCode = invokeAndroidLintCLI(
       invoker = invoker,
       actionArgs = args,
       projectFilePath = projectFile,
       baselineFilePath = baselineFile,
-      cacheDirectoryPath = workingDirectory.resolve("android-cache"),
+      cacheDirectoryPath = androidCacheFolder,
     )
 
     // Pure hacks to strip the relative paths and exec roots out of the file
