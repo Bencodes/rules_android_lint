@@ -34,7 +34,7 @@ jobs:
           key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
           restore-keys: bazel-cache-
       - name: "Setup Bazelisk"
-        uses: bazelbuild/setup-bazelisk@v2
+        uses: bazelbuild/setup-bazelisk@v3
       - name: "Running tests //..."
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
@@ -59,7 +59,7 @@ jobs:
           key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
           restore-keys: bazel-cache-
       - name: "Setup Bazelisk"
-        uses: bazelbuild/setup-bazelisk@v2
+        uses: bazelbuild/setup-bazelisk@v3
       - name: "Running integration tests ${{ matrix.directory }}"
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
