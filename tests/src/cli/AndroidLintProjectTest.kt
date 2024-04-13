@@ -22,6 +22,7 @@ class AndroidLintProjectTest {
     assertThat(
       createProjectXMLString(
         moduleName = "test_module_name",
+        rootDir = tmpDirectory.root.absolutePath,
         srcs = listOf(tmpDirectory.newPath("Foo.kt")),
         resources = listOf(tmpDirectory.newPath("foo.xml")),
         androidManifest = tmpDirectory.newPath("AndroidManifest.xml"),
@@ -39,6 +40,7 @@ class AndroidLintProjectTest {
       """
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <project>
+        <root dir="{root}"/>
         <module android="true" name="test_module_name">
           <src file="{root}/Foo.kt"/>
           <resource file="{root}/foo.xml"/>

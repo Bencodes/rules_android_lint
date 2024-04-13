@@ -12,6 +12,7 @@ import kotlin.io.path.pathString
 
 internal fun createProjectXMLString(
   moduleName: String,
+  rootDir: String,
   srcs: List<Path>,
   resources: List<Path>,
   androidManifest: Path?,
@@ -24,6 +25,11 @@ internal fun createProjectXMLString(
 
   val projectElement = document.createElement("project")
   document.appendChild(projectElement)
+
+  document.createElement("root").also {
+    it.setAttribute("dir", rootDir)
+    projectElement.appendChild(it)
+  }
 
   val moduleElement = document.createElement("module").also {
     it.setAttribute("name", moduleName)
