@@ -27,14 +27,14 @@ jobs:
       - name: "Checkout the sources"
         uses: actions/checkout@v4
       - name: Mount bazel caches
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/bazel
           key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
           restore-keys: bazel-cache-
       - name: "Setup Bazelisk"
-        uses: bazelbuild/setup-bazelisk@v2
+        uses: bazelbuild/setup-bazelisk@v3
       - name: "Running tests //..."
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
@@ -52,14 +52,14 @@ jobs:
       - name: "Checkout the sources"
         uses: actions/checkout@v4
       - name: Mount bazel caches
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/bazel
           key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
           restore-keys: bazel-cache-
       - name: "Setup Bazelisk"
-        uses: bazelbuild/setup-bazelisk@v2
+        uses: bazelbuild/setup-bazelisk@v3
       - name: "Running integration tests ${{ matrix.directory }}"
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
