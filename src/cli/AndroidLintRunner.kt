@@ -10,7 +10,6 @@ import kotlin.io.path.extension
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 import kotlin.io.path.pathString
-import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 internal class AndroidLintRunner {
@@ -44,9 +43,12 @@ internal class AndroidLintRunner {
     // Create the project configuration file for lint
     val projectFile = workingDirectory.resolve("${args.label}_project_config.xml")
     Files.createFile(projectFile)
+
+    val rootDir = System.getenv("PWD")
     projectFile.writeText(
       createProjectXMLString(
         moduleName = args.label,
+        rootDir = rootDir,
         srcs = args.srcs.sortedDescending(),
         resources = args.resources.sortedDescending(),
         androidManifest = args.androidManifest,
@@ -64,17 +66,11 @@ internal class AndroidLintRunner {
     val exitCode = invokeAndroidLintCLI(
       invoker = invoker,
       actionArgs = args,
+      rootDirPath = rootDir,
       projectFilePath = projectFile,
       baselineFilePath = baselineFile,
       cacheDirectoryPath = androidCacheFolder,
     )
-
-    // Pure hacks to strip the relative paths and exec roots out of the file
-    // locations. Lint doesn't offer any way to disable this and if we parse-and-transform the
-    // baseline using a proper XML parser we can't easily preserve the baseline formatting.
-    val sanitizedContent = args.output.readText()
-      .run { AndroidLintBaselineSanitizer.sanitize(this) }
-    args.output.writeText(sanitizedContent)
 
     return when (exitCode) {
       AndroidLintCliInvoker.ERRNO_SUCCESS,
@@ -88,6 +84,7 @@ internal class AndroidLintRunner {
   private fun invokeAndroidLintCLI(
     invoker: AndroidLintCliInvoker,
     actionArgs: AndroidLintActionArgs,
+    rootDirPath: String,
     projectFilePath: Path,
     baselineFilePath: Path,
     cacheDirectoryPath: Path,
@@ -97,6 +94,8 @@ internal class AndroidLintRunner {
       projectFilePath.pathString,
       "--xml",
       actionArgs.output.pathString,
+      "--path-variables",
+      "PWD=$rootDirPath",
       "--exitcode",
       "--compile-sdk-version",
       actionArgs.compileSdkVersion,
