@@ -10,7 +10,6 @@ import kotlin.io.path.extension
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 import kotlin.io.path.pathString
-import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 internal class AndroidLintRunner {
