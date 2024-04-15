@@ -174,9 +174,6 @@ def process_android_lint_issues(ctx, regenerate):
     # Append the Android manifest file. Lint requires that the input manifest files be named
     # exactly `AndroidManifest.xml`.
     manifest = ctx.file.manifest
-    if manifest and manifest.basename != "AndroidManifest.xml":
-        manifest = ctx.actions.declare_file("AndroidManifest.xml")
-        ctx.actions.symlink(output = manifest, target_file = ctx.file.manifest)
 
     merged_manifest = None
     if ctx.attr.lib and AndroidManifestInfo in ctx.attr.lib and AndroidBinaryData in ctx.attr.lib:
