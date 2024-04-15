@@ -111,6 +111,7 @@ internal class AndroidLintRunner {
       "--update-baseline",
       "--cache-dir",
       cacheDirectoryPath.pathString,
+      "--client-id", "cli",
     )
     if (actionArgs.warningsAsErrors) {
       args.add("-Werror")
