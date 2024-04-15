@@ -1,4 +1,4 @@
-package com.rules.android.lint.examples;
+package com.rules.android.lint;
 
 import android.app.Activity;
 

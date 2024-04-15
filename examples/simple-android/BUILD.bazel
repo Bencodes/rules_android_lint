@@ -12,7 +12,7 @@ android_library(
 android_binary(
     name = "bin",
     srcs = ["Foo.java"],
-    custom_package = "com.rules.android.lint.examples",
+    custom_package = "com.rules.android.lint",
     manifest = "AndroidManifest.xml",
     deps = [
         ":lib",
