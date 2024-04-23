@@ -121,8 +121,6 @@ def _run_android_lint(
     toolchain = _utils.get_android_lint_toolchain(ctx)
     if toolchain.android_home != None:
         args.add("--android-home", toolchain.android_home.label.workspace_root)
-    else:
-        print("WARNING: No android-home has been specified! Some linters will be omitted!")
 
     ctx.actions.run(
         mnemonic = "AndroidLint",
