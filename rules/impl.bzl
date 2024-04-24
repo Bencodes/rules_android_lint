@@ -45,6 +45,7 @@ def _run_android_lint(
         android_lint: The Android Lint binary to use
         module_name: The name of the module
         xml_output: The xml_output file
+        html_output: The html_output file
         srcs: The source files
         deps: Depset of aars and jars to include on the classpath
         resource_files: The Android resource files
