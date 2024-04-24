@@ -19,7 +19,7 @@ def _run_android_lint(
         ctx,
         android_lint,
         module_name,
-        output,
+        xml_output,
         html_output,
         srcs,
         deps,
@@ -44,7 +44,7 @@ def _run_android_lint(
         ctx: The target context
         android_lint: The Android Lint binary to use
         module_name: The name of the module
-        output: The output file
+        xml_output: The xml_output file
         srcs: The source files
         deps: Depset of aars and jars to include on the classpath
         resource_files: The Android resource files
@@ -64,7 +64,7 @@ def _run_android_lint(
         android_lint_skip_bytecode_verifier: Disables bytecode verification
     """
     inputs = []
-    outputs = [output, html_output]
+    outputs = []
 
     args = ctx.actions.args()
     args.set_param_file_format("multiline")
@@ -115,16 +115,14 @@ def _run_android_lint(
     if android_lint_enable_check_dependencies:
         args.add("--enable-check-dependencies")
 
-    # Declare the output file
-    args.add("--output", output)
-    outputs.append(output)
-
-    args.add("--html-output", html_output)
-    outputs.append(html_output)
-
-    label = ctx.attr.android_home.label
-    if ctx.attr.android_home:
-        args.add("--android_home", label.workspace_root)
+    if xml_output != None:
+        args.add("--xml-output", xml_output)
+        outputs.append(xml_output)
+    if html_output != None:
+        args.add("--html-output", html_output)
+        outputs.append(html_output)
+    if len(outputs) == 0:
+        fail("Lint cannot have no outputs!")
 
     ctx.actions.run(
         mnemonic = "AndroidLint",
@@ -171,7 +169,7 @@ def process_android_lint_issues(ctx, regenerate):
         regenerate: Whether to regenerate the baseline files
 
     Returns:
-        A struct containing the output file and the providers
+        A struct containing the output files and the providers
     """
 
     # Append the Android manifest file. Lint requires that the input manifest files be named
@@ -205,13 +203,20 @@ def process_android_lint_issues(ctx, regenerate):
             _utils.list_or_depset_to_list(_utils.get_android_lint_toolchain(ctx).android_lint_config.files),
         )
 
-    output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
-    html_output = ctx.actions.declare_file("{}.html".format(ctx.label.name))
+    baseline = getattr(ctx.file, "baseline", None)
+    xml_output = None
+    html_output = None
+    for output_format in ctx.attr.output_formats:
+        if output_format == "xml":
+            xml_output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
+        if output_format == "html":
+            html_output = ctx.actions.declare_file("{}.html".format(ctx.label.name))
+
     _run_android_lint(
         ctx,
         android_lint = _utils.only(_utils.list_or_depset_to_list(_utils.get_android_lint_toolchain(ctx).android_lint.files)),
         module_name = _get_module_name(ctx),
-        output = output,
+        xml_output = xml_output,
         html_output = html_output,
         srcs = ctx.files.srcs,
         deps = depset(transitive = deps),
@@ -220,7 +225,7 @@ def process_android_lint_issues(ctx, regenerate):
         compile_sdk_version = _utils.get_android_lint_toolchain(ctx).compile_sdk_version,
         java_language_level = _utils.get_android_lint_toolchain(ctx).java_language_level,
         kotlin_language_level = _utils.get_android_lint_toolchain(ctx).kotlin_language_level,
-        baseline = getattr(ctx.file, "baseline", None),
+        baseline = baseline,
         config = config,
         warnings_as_errors = ctx.attr.warnings_as_errors,
         custom_rules = ctx.files.custom_rules,
@@ -233,10 +238,14 @@ def process_android_lint_issues(ctx, regenerate):
     )
 
     return struct(
-        output = output,
+        baseline = baseline,
+        xml_output = xml_output,
+        html_output = html_output,
         providers = [
             _AndroidLintResultsInfo(
-                output = output,
+                baseline = baseline,
+                xml_output = xml_output,
+                html_output = html_output,
             ),
         ],
     )

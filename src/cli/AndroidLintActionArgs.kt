@@ -32,17 +32,17 @@ internal class AndroidLintActionArgs(
     transform = argsParserPathTransformer,
   )
 
-  val output: Path by parser.storing(
-    names = arrayOf("--output"),
+  val xmlOutput: Path? by parser.storing(
+    names = arrayOf("--xml-output"),
     help = "",
     transform = argsParserPathTransformer,
-  )
+  ).default { null }
 
-  val htmlOutput: Path by parser.storing(
+  val htmlOutput: Path? by parser.storing(
     names = arrayOf("--html-output"),
     help = "",
     transform = argsParserPathTransformer,
-  )
+  ).default { null }
 
   val resources: List<Path> by parser.adding(
     names = arrayOf("--resource"),

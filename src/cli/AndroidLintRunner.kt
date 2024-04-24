@@ -94,10 +94,6 @@ internal class AndroidLintRunner {
       projectFilePath.pathString,
       "--path-variables",
       "PWD=$rootDirPath",
-      "--xml",
-      actionArgs.output.pathString,
-      "--html",
-      actionArgs.htmlOutput.pathString,
       "--exitcode",
       "--compile-sdk-version",
       actionArgs.compileSdkVersion,
@@ -115,6 +111,16 @@ internal class AndroidLintRunner {
       cacheDirectoryPath.pathString,
       "--client-id", "cli",
     )
+    if (actionArgs.xmlOutput != null) {
+      args.add("--xml")
+      args.add(actionArgs.xmlOutput!!.pathString)
+    }
+
+    if (actionArgs.htmlOutput != null) {
+      args.add("--html")
+      args.add(actionArgs.htmlOutput!!.pathString)
+    }
+
     if (actionArgs.warningsAsErrors) {
       args.add("-Werror")
     } else {
