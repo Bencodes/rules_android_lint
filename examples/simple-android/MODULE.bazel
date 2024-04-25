@@ -11,7 +11,7 @@ local_path_override(
     path = "../../",
 )
 
-bazel_dep(name = "platforms", version = "0.0.9")
+bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "rules_android", version = "0.1.1")
 bazel_dep(name = "rules_jvm_external", version = "5.3")
 
