@@ -1,4 +1,3 @@
-common --enable_bzlmod
 common --experimental_google_legacy_api
 
 try-import %workspace%/.bazelrc.user
