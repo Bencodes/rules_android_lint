@@ -2,9 +2,11 @@ package com.rules.android.lint.cli
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.isRegularFile
@@ -129,6 +131,13 @@ internal class AndroidLintRunner {
     if (actionArgs.disableChecks.isNotEmpty()) {
       args.add("--disable")
       args.add(actionArgs.disableChecks.joinToString(","))
+    }
+
+    if (actionArgs.androidHome?.isNotEmpty() != null) {
+      var androidHomePath =
+        Paths.get(System.getenv("PWD"), actionArgs.androidHome).absolutePathString()
+      args.add("--sdk-home")
+      args.add(androidHomePath)
     }
 
     invoker.setCheckDependencies(actionArgs.enableCheckDependencies)
