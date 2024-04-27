@@ -40,6 +40,10 @@ _ATTRS = dict(
         allow_single_file = True,
         cfg = "exec",
     ),
+    android_home = attr.label(
+        mandatory = False,
+        doc = "The target that represents where the ANDROID_HOME is located.",
+    ),
 )
 
 def _impl(ctx):

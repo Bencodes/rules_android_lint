@@ -118,6 +118,10 @@ def _run_android_lint(
     args.add("--output", output)
     outputs.append(output)
 
+    toolchain = _utils.get_android_lint_toolchain(ctx)
+    if toolchain.android_home != None:
+        args.add("--android-home", toolchain.android_home.label.workspace_root)
+
     ctx.actions.run(
         mnemonic = "AndroidLint",
         inputs = inputs,
