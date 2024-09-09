@@ -77,5 +77,11 @@ ATTRS = dict(
         default = [],
         doc = "Custom lint rules to run.",
     ),
+    output_formats = attr.string_list(
+        mandatory = False,
+        allow_empty = False,
+        default = ["xml"],
+        doc = "List of output formats to produce. Supported [xml, html]",
+    ),
     _use_auto_exec_groups = attr.bool(default = True),
 )
