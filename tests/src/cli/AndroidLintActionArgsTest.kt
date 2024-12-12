@@ -19,8 +19,10 @@ class AndroidLintActionArgsTest {
         "path/to/cli.jar",
         "--src",
         "path/to/Foo.kt",
-        "--output",
-        "output.jar",
+        "--xml-output",
+        "xml_output.xml",
+        "--html-output",
+        "html_output.html",
         "--resource",
         "path/to/resource/strings.xml",
         "--android-manifest",
@@ -54,7 +56,8 @@ class AndroidLintActionArgsTest {
 
     assertThat(parseArgs.label).isEqualTo("test")
     assertThat(parseArgs.srcs).containsExactly(Paths.get("path/to/Foo.kt"))
-    assertThat(parseArgs.output).isEqualTo(Paths.get("output.jar"))
+    assertThat(parseArgs.xmlOutput).isEqualTo(Paths.get("xml_output.xml"))
+    assertThat(parseArgs.htmlOutput).isEqualTo(Paths.get("html_output.html"))
     assertThat(parseArgs.resources).containsExactly(Paths.get("path/to/resource/strings.xml"))
     assertThat(parseArgs.baselineFile).isEqualTo(Paths.get("lib_lint_baseline.xml"))
     assertThat(parseArgs.config).isEqualTo(Paths.get("lint_config.xml"))

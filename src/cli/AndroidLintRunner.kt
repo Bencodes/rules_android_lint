@@ -94,8 +94,6 @@ internal class AndroidLintRunner {
     val args = mutableListOf(
       "--project",
       projectFilePath.pathString,
-      "--xml",
-      actionArgs.output.pathString,
       "--path-variables",
       "PWD=$rootDirPath",
       "--exitcode",
@@ -115,6 +113,16 @@ internal class AndroidLintRunner {
       cacheDirectoryPath.pathString,
       "--client-id", "cli",
     )
+    if (actionArgs.xmlOutput != null) {
+      args.add("--xml")
+      args.add(actionArgs.xmlOutput!!.pathString)
+    }
+
+    if (actionArgs.htmlOutput != null) {
+      args.add("--html")
+      args.add(actionArgs.htmlOutput!!.pathString)
+    }
+
     if (actionArgs.warningsAsErrors) {
       args.add("-Werror")
     } else {

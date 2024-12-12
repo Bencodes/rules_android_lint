@@ -4,6 +4,8 @@
 AndroidLintResultsInfo = provider(
     "Info needed to evaluate lint results",
     fields = {
-        "output": "The Android Lint baseline output",
+        "baseline": "The Android Lint baseline output",
+        "xml_output": "The Android Lint xml output",
+        "html_output": "The Android Lint html output",
     },
 )

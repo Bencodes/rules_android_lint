@@ -21,12 +21,17 @@ def _impl(ctx):
     android_lint_results = _process_android_lint_issues(ctx, regenerate = False)
 
     inputs = []
-    inputs.append(android_lint_results.output)
+    inputs.append(android_lint_results.xml_output)
 
+    files_output = []
+    if android_lint_results.xml_output != None:
+        files_output.append(android_lint_results.xml_output)
+    if android_lint_results.html_output != None:
+        files_output.append(android_lint_results.html_output)
     return [
         DefaultInfo(
             runfiles = ctx.runfiles(files = inputs),
-            files = depset([android_lint_results.output]),
+            files = depset(files_output),
         ),
     ] + android_lint_results.providers
 
