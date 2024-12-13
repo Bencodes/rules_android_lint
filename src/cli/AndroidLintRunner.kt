@@ -54,6 +54,7 @@ internal class AndroidLintRunner {
         srcs = args.srcs.sortedDescending(),
         resources = args.resources.sortedDescending(),
         androidManifest = args.androidManifest,
+        androidMergedManifest = args.androidMergedManifest,
         classpathJars = jars.sortedDescending(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = unpackedAars,

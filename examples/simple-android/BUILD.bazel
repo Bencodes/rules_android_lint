@@ -1,25 +1,53 @@
-load("@rules_android//android:rules.bzl", "android_library")
+load("@rules_android//android:rules.bzl", "android_binary", "android_library")
 load("@rules_android_lint//rules:defs.bzl", "android_lint", "android_lint_test")
 load("@rules_android_lint//toolchains:toolchain.bzl", "android_lint_toolchain")
 
 android_library(
     name = "lib",
-    srcs = ["Foo.java"],
+    srcs = ["TestActivity.java"],
     custom_package = "com.rules.android.lint.examples",
+    manifest = "LibManifest.xml",
+)
+
+android_binary(
+    name = "bin",
+    srcs = ["Foo.java"],
+    custom_package = "com.rules.android.lint",
+    manifest = "AndroidManifest.xml",
+    deps = [
+        ":lib",
+    ],
 )
 
 android_lint(
     name = "lib_lint",
-    srcs = ["Foo.java"],
+    srcs = ["TestActivity.java"],
     android_lint_config = "lint.xml",
     lib = ":lib",
+    manifest = "LibManifest.xml",
 )
 
 android_lint_test(
     name = "lib_lint_test",
-    srcs = ["Foo.java"],
+    srcs = ["TestActivity.java"],
     baseline = "lib_lint_test_lint_baseline.xml",
     lib = ":lib",
+    manifest = "LibManifest.xml",
+)
+
+android_lint(
+    name = "bin_lint",
+    srcs = ["Foo.java"],
+    android_lint_config = "lint.xml",
+    lib = ":bin",
+    manifest = "AndroidManifest.xml",
+)
+
+android_lint_test(
+    name = "bin_lint_test",
+    srcs = ["Foo.java"],
+    baseline = "bin_lint_test_lint_baseline.xml",
+    lib = ":bin",
 )
 
 android_lint_toolchain(
