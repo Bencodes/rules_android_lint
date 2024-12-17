@@ -9,6 +9,7 @@ bazel_dep(name = "rules_jvm_external", version = "5.3")
 bazel_dep(name = "rules_kotlin", version = "1.9.5")
 bazel_dep(name = "bazel_skylib", version = "1.4.2")
 bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "rules_android", version = "0.6.0")
 
 bazel_dep(name = "aspect_bazel_lib", version = "1.32.1", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "6.1.2", dev_dependency = True)
