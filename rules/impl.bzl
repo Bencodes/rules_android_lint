@@ -14,6 +14,11 @@ load(
     _ANDROID_LINT_TOOLCHAIN_TYPE = "ANDROID_LINT_TOOLCHAIN_TYPE",
     _utils = "utils",
 )
+load(
+    "@rules_android//providers:providers.bzl",
+    "AndroidLibraryResourceClassJarProvider",
+    "AndroidLibraryAarInfo"
+)
 
 def _run_android_lint(
         ctx,
