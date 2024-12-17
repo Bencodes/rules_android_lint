@@ -19,6 +19,10 @@ load(
     "AndroidLibraryResourceClassJarProvider",
     "AndroidLibraryAarInfo"
 )
+load(
+    "@rules_java//java:defs.bzl",
+    "JavaInfo"
+)
 
 def _run_android_lint(
         ctx,
