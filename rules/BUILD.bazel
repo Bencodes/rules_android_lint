@@ -72,6 +72,7 @@ bzl_library(
     deps = [
         ":collect_aar_outputs_aspect",
         "@bazel_skylib//lib:dicts",
+        "@rules_android//providers:providers_bzl",
     ],
 )
 
