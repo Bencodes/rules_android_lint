@@ -72,6 +72,8 @@ bzl_library(
     deps = [
         ":collect_aar_outputs_aspect",
         "@bazel_skylib//lib:dicts",
+        "@rules_java//java:rules",
+        "@rules_java//java/private:proto_support",
     ],
 )
 
