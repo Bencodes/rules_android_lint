@@ -2,6 +2,15 @@
 """
 
 load(
+    "@rules_android//providers:providers.bzl",
+    "AndroidLibraryAarInfo",
+    "AndroidLibraryResourceClassJarProvider",
+)
+load(
+    "@rules_java//java:defs.bzl",
+    "JavaInfo",
+)
+load(
     ":collect_aar_outputs_aspect.bzl",
     _AndroidLintAARInfo = "AndroidLintAARInfo",
 )
@@ -13,15 +22,6 @@ load(
     ":utils.bzl",
     _ANDROID_LINT_TOOLCHAIN_TYPE = "ANDROID_LINT_TOOLCHAIN_TYPE",
     _utils = "utils",
-)
-load(
-    "@rules_android//providers:providers.bzl",
-    "AndroidLibraryResourceClassJarProvider",
-    "AndroidLibraryAarInfo"
-)
-load(
-    "@rules_java//java:defs.bzl",
-    "JavaInfo"
 )
 
 def _run_android_lint(
