@@ -1,20 +1,20 @@
 """Android lint test rule."""
 
 load(
-    ":impl.bzl",
-    _process_android_lint_issues = "process_android_lint_issues",
+    "@bazel_skylib//lib:dicts.bzl",
+    _dicts = "dicts",
 )
 load(
     ":attrs.bzl",
     _ATTRS = "ATTRS",
 )
 load(
-    ":providers.bzl",
-    _AndroidLintResultsInfo = "AndroidLintResultsInfo",
+    ":impl.bzl",
+    _process_android_lint_issues = "process_android_lint_issues",
 )
 load(
-    "@bazel_skylib//lib:dicts.bzl",
-    _dicts = "dicts",
+    ":providers.bzl",
+    _AndroidLintResultsInfo = "AndroidLintResultsInfo",
 )
 
 def _test_impl(ctx):
