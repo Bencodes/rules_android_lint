@@ -47,7 +47,7 @@ jobs:
         bzlmod: [true]
         directory: [examples/simple-android]
         strategy: [local, worker]
-        bazel_version: ["7.1.1"]
+        bazel_version: ["7.4.1"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout the sources"
