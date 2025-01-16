@@ -6,7 +6,6 @@ import java.nio.file.Files
 import kotlin.system.exitProcess
 
 object AndroidLintAction {
-
   @JvmStatic
   fun main(args: Array<String>) {
     val worker = Worker.fromArgs(args, AndroidLintExecutor())
@@ -15,7 +14,10 @@ object AndroidLintAction {
   }
 
   private class AndroidLintExecutor : Worker.WorkRequestCallback {
-    override fun processWorkRequest(args: List<String>, printStream: PrintStream): Int {
+    override fun processWorkRequest(
+      args: List<String>,
+      printStream: PrintStream,
+    ): Int {
       val workingDirectory = Files.createTempDirectory("rules")
 
       try {

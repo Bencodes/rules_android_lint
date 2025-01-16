@@ -5,7 +5,10 @@ import java.nio.file.Path
 import java.util.zip.ZipInputStream
 import kotlin.io.path.inputStream
 
-internal fun unzip(src: Path, dst: Path) {
+internal fun unzip(
+  src: Path,
+  dst: Path,
+) {
   val dstFile = dst.toFile()
   val bufferedZipInputStream = src.inputStream().buffered()
   ZipInputStream(bufferedZipInputStream).use { zipStream ->
@@ -14,7 +17,9 @@ internal fun unzip(src: Path, dst: Path) {
       if (zipEntry.isDirectory) {
         File(dstFile, zipEntry.name).mkdirs()
       } else {
-        File(dstFile, zipEntry.name).also { it.parentFile.mkdirs() }.outputStream()
+        File(dstFile, zipEntry.name)
+          .also { it.parentFile.mkdirs() }
+          .outputStream()
           .use { fileOutputStream -> zipStream.copyTo(fileOutputStream) }
       }
 
