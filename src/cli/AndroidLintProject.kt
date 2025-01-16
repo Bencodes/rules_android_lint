@@ -31,13 +31,14 @@ internal fun createProjectXMLString(
     projectElement.appendChild(it)
   }
 
-  val moduleElement = document.createElement("module").also {
-    it.setAttribute("name", moduleName)
-    it.setAttribute("android", if (androidManifest != null) "true" else "false")
-    // it.setAttribute("library", "false")
-    // it.setAttribute("compile-sdk-version", "get-actual-value-here")
-    projectElement.appendChild(it)
-  }
+  val moduleElement =
+    document.createElement("module").also {
+      it.setAttribute("name", moduleName)
+      it.setAttribute("android", if (androidManifest != null) "true" else "false")
+      // it.setAttribute("library", "false")
+      // it.setAttribute("compile-sdk-version", "get-actual-value-here")
+      projectElement.appendChild(it)
+    }
 
   customLintChecks.forEach { jar ->
     document.createElement("lint-checks").also {
@@ -83,10 +84,12 @@ internal fun createProjectXMLString(
     moduleElement.appendChild(element)
   }
 
-  return StringWriter().apply {
-    val transformer = TransformerFactory.newInstance().newTransformer()
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes")
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
-    transformer.transform(DOMSource(document), StreamResult(this))
-  }.buffer.toString()
+  return StringWriter()
+    .apply {
+      val transformer = TransformerFactory.newInstance().newTransformer()
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+      transformer.transform(DOMSource(document), StreamResult(this))
+    }.buffer
+    .toString()
 }

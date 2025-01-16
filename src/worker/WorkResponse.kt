@@ -8,13 +8,11 @@ data class WorkResponse(
    */
   @Json(name = "requestId")
   val requestId: Int,
-
   /**
    * Exit status for the work request
    */
   @Json(name = "exitCode")
   val exitCode: Int,
-
   /**
    * Standard output that was collected during the work request
    */

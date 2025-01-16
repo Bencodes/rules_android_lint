@@ -15,7 +15,6 @@ import kotlin.io.path.pathString
 import kotlin.io.path.writeText
 
 internal class AndroidLintRunner {
-
   internal fun runAndroidLint(
     args: AndroidLintActionArgs,
     workingDirectory: Path,
@@ -37,10 +36,11 @@ internal class AndroidLintRunner {
     val unpackedAars = unpackAars(aars, workingDirectory.resolve("aars"))
 
     // Collect the custom lint rules from the unpacked aars
-    val aarLintRuleJars = unpackedAars
-      .asSequence()
-      .map { it.first.resolve("lint.jar") }
-      .filter { it.exists() && it.isRegularFile() }
+    val aarLintRuleJars =
+      unpackedAars
+        .asSequence()
+        .map { it.first.resolve("lint.jar") }
+        .filter { it.exists() && it.isRegularFile() }
 
     // Create the project configuration file for lint
     val projectFile = workingDirectory.resolve("${args.label}_project_config.xml")
@@ -65,14 +65,15 @@ internal class AndroidLintRunner {
     val androidCacheFolder = workingDirectory.resolve("android-cache")
     Files.createDirectory(androidCacheFolder)
     val invoker = AndroidLintCliInvoker.createUsingJars(jars = arrayOf(args.androidLintCliTool))
-    val exitCode = invokeAndroidLintCLI(
-      invoker = invoker,
-      actionArgs = args,
-      rootDirPath = rootDir,
-      projectFilePath = projectFile,
-      baselineFilePath = baselineFile,
-      cacheDirectoryPath = androidCacheFolder,
-    )
+    val exitCode =
+      invokeAndroidLintCLI(
+        invoker = invoker,
+        actionArgs = args,
+        rootDirPath = rootDir,
+        projectFilePath = projectFile,
+        baselineFilePath = baselineFile,
+        cacheDirectoryPath = androidCacheFolder,
+      )
 
     return when (exitCode) {
       AndroidLintCliInvoker.ERRNO_SUCCESS,
@@ -91,30 +92,32 @@ internal class AndroidLintRunner {
     baselineFilePath: Path,
     cacheDirectoryPath: Path,
   ): Int {
-    val args = mutableListOf(
-      "--project",
-      projectFilePath.pathString,
-      "--xml",
-      actionArgs.output.pathString,
-      "--path-variables",
-      "PWD=$rootDirPath",
-      "--exitcode",
-      "--compile-sdk-version",
-      actionArgs.compileSdkVersion,
-      "--java-language-level",
-      actionArgs.javaLanguageLevel,
-      "--kotlin-language-level",
-      actionArgs.kotlinLanguageLevel,
-      "--stacktrace",
-      "--quiet",
-      "--offline",
-      "--baseline",
-      baselineFilePath.pathString,
-      "--update-baseline",
-      "--cache-dir",
-      cacheDirectoryPath.pathString,
-      "--client-id", "cli",
-    )
+    val args =
+      mutableListOf(
+        "--project",
+        projectFilePath.pathString,
+        "--xml",
+        actionArgs.output.pathString,
+        "--path-variables",
+        "PWD=$rootDirPath",
+        "--exitcode",
+        "--compile-sdk-version",
+        actionArgs.compileSdkVersion,
+        "--java-language-level",
+        actionArgs.javaLanguageLevel,
+        "--kotlin-language-level",
+        actionArgs.kotlinLanguageLevel,
+        "--stacktrace",
+        "--quiet",
+        "--offline",
+        "--baseline",
+        baselineFilePath.pathString,
+        "--update-baseline",
+        "--cache-dir",
+        cacheDirectoryPath.pathString,
+        "--client-id",
+        "cli",
+      )
     if (actionArgs.warningsAsErrors) {
       args.add("-Werror")
     } else {

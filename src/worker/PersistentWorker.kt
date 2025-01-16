@@ -14,38 +14,34 @@ internal class PersistentWorker(
    * WorkerIO instance wrapping the standard output streams
    */
   private val workerIO: WorkerIO,
-
   /**
    * Rxjava Scheduler to execute work requests on.
    */
   private val scheduler: Scheduler,
-
   /**
    * Instance of CpuTimeBasedGcScheduler that will run periodically
    */
   private val persistentWorkerCpuTimeBasedGcScheduler: PersistentWorkerCpuTimeBasedGcScheduler,
-
   /**
    * Instance of CpuTimeBasedGcScheduler that will run periodically
    */
   private val workRequestProcessor: Worker.WorkerMessageProcessor,
-
   /**
    * Instance of CpuTimeBasedGcScheduler that will run periodically
    */
   private val workerWorkRequestCallback: Worker.WorkRequestCallback,
 ) : Worker {
-
   constructor(
     workerMessageProcessor: Worker.WorkRequestCallback,
   ) : this(
     workerIO = WorkerIO(),
     scheduler = Schedulers.io(),
     persistentWorkerCpuTimeBasedGcScheduler = PersistentWorkerCpuTimeBasedGcScheduler(),
-    workRequestProcessor = WorkerJsonMessageProcessor(
-      System.`in`,
-      System.out,
-    ),
+    workRequestProcessor =
+      WorkerJsonMessageProcessor(
+        System.`in`,
+        System.out,
+      ),
     workerWorkRequestCallback = workerMessageProcessor,
   )
 
@@ -59,24 +55,29 @@ internal class PersistentWorker(
       io.redirectSystemStreams()
 
       // Process requests as they come in using RxJava
-      Flowable.create(
-        { emitter ->
-          while (!emitter.isCancelled) {
-            try {
-              val request: WorkRequest = workRequestProcessor.readWorkRequest()
-              emitter.onNext(request)
-            } catch (e: IOException) {
-              emitter.onError(e)
+      Flowable
+        .create(
+          { emitter ->
+            while (!emitter.isCancelled) {
+              try {
+                val request: WorkRequest = workRequestProcessor.readWorkRequest()
+                emitter.onNext(request)
+              } catch (e: IOException) {
+                emitter.onError(e)
+              }
             }
-          }
-        },
-        BackpressureStrategy.BUFFER,
-      ).subscribeOn(scheduler).parallel().runOn(scheduler)
+          },
+          BackpressureStrategy.BUFFER,
+        ).subscribeOn(scheduler)
+        .parallel()
+        .runOn(scheduler)
         // Execute the work and map the result to a work response
         .map { request -> return@map this.respondToRequest(request) }
         // Run the garbage collector periodically so that we are a good responsible worker
         .doOnNext { persistentWorkerCpuTimeBasedGcScheduler.maybePerformGc() }
-        .doOnError { it.printStackTrace() }.sequential().observeOn(scheduler)
+        .doOnError { it.printStackTrace() }
+        .sequential()
+        .observeOn(scheduler)
         .blockingSubscribe { response ->
           workRequestProcessor.writeWorkResponse(response)
         }
@@ -108,11 +109,12 @@ internal class PersistentWorker(
         printStream.flush()
       }
 
-      val output = arrayOf(baos.toString())
-        .asSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .joinToString("\n")
+      val output =
+        arrayOf(baos.toString())
+          .asSequence()
+          .map { it.trim() }
+          .filter { it.isNotEmpty() }
+          .joinToString("\n")
       return WorkResponse(
         exitCode = exitCode,
         output = output,

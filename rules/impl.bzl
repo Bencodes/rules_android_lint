@@ -1,6 +1,7 @@
 """Rule implementation for Android Lint
 """
 
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "@rules_android//providers:providers.bzl",
     "AndroidLibraryAarInfo",

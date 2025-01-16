@@ -15,7 +15,6 @@ class WorkerJsonMessageProcessor(
   inputStream: InputStream,
   outputStream: OutputStream,
 ) : Worker.WorkerMessageProcessor {
-
   // Moshi JSON type adapters
   private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
   private val workRequestAdapter: JsonAdapter<WorkRequest> = moshi.adapter(WorkRequest::class.java)
