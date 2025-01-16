@@ -10,12 +10,12 @@ import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
-object AndroidLintAction {
+object AndroidLintPersistentWorker {
   @JvmStatic
   fun main(args: Array<String>) {
     if ("--persistent_worker" in args) {
       val worker = PersistentWorker()
-      worker.start(AndroidLintPersistentWorker()).run(::exitProcess)
+      worker.start(AndroidLint()).run(::exitProcess)
       return
     }
     val worker = Worker.fromArgs(args, AndroidLintExecutor())
@@ -23,7 +23,7 @@ object AndroidLintAction {
     exitProcess(exitCode)
   }
 
-  private class AndroidLintPersistentWorker
+  private class AndroidLint
     @Inject
     constructor() : Work {
       override fun invoke(
@@ -32,9 +32,13 @@ object AndroidLintAction {
       ): Status {
         val workingDirectory = Files.createTempDirectory("rules")
         try {
+          val runner = AndroidLintRunner()
           val parsedArgs = AndroidLintActionArgs.parseArgs(args.toList())
-          val result = AndroidLintRunner().runAndroidLint(parsedArgs, workingDirectory)
-          return if (result != 0) Status.ERROR else Status.SUCCESS
+          val result = runner.runAndroidLint(parsedArgs, workingDirectory)
+          if (result == 0) {
+            return Status.SUCCESS
+          }
+          return Status.ERROR
         } catch (exception: Exception) {
           return Status.ERROR
         } finally {
@@ -57,8 +61,7 @@ object AndroidLintAction {
       try {
         val runner = AndroidLintRunner()
         val parsedArgs = AndroidLintActionArgs.parseArgs(args)
-        runner.runAndroidLint(parsedArgs, workingDirectory)
-        return 0
+        return runner.runAndroidLint(parsedArgs, workingDirectory)
       } catch (exception: Exception) {
         exception.printStackTrace()
         return 1

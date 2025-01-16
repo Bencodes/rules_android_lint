@@ -1,0 +1,12 @@
+diff --git a/src/main/kotlin/BUILD.bazel b/src/main/kotlin/BUILD.bazel
+index 5f04f0e..6668b05 100755
+--- a/src/main/kotlin/BUILD.bazel
++++ b/src/main/kotlin/BUILD.bazel
+@@ -17,6 +17,7 @@ load("@rules_java//java:defs.bzl", "java_binary", "java_import")
+ java_import(
+     name = "worker",
+     jars = ["kotlin_worker.jar"],
++    visibility = ["//visibility:public"],
+ )
+ 
+ java_import(

@@ -12,6 +12,7 @@ kt_jvm_library(
         "@rules_android_lint_deps//:com_squareup_okio_okio_jvm",
         "@rules_android_lint_deps//:io_reactivex_rxjava3_rxjava",
         "@rules_android_lint_deps//:org_reactivestreams_reactive_streams",
+        "@rules_kotlin//src/main/kotlin:worker",
     ],
 )
 

@@ -15,6 +15,9 @@ load(
     _ANDROID_LINT_TOOLCHAIN_TYPE = "ANDROID_LINT_TOOLCHAIN_TYPE",
     _utils = "utils",
 )
+# Estimation is done by VisualVM runs + assumption of GC kicking in
+def _resource_set_callback(os_name, num_inputs):
+    return {"cpu": 5, "memory": 10000}
 
 def _run_android_lint(
         ctx,
@@ -135,12 +138,13 @@ def _run_android_lint(
         execution_requirements = {
             "supports-workers": "1",
             "supports-multiplex-workers": "1",
-            "requires-worker-protocol": "json",
+            "requires-worker-protocol": "proto",
         },
         env = {
             # https://googlesamples.github.io/android-custom-lint-rules/usage/variables.md.html
             "ANDROID_LINT_SKIP_BYTECODE_VERIFIER": ("true" if android_lint_skip_bytecode_verifier else "false"),
         },
+        resource_set = _resource_set_callback,
     )
 
 def _get_module_name(ctx):
