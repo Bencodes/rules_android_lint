@@ -10,15 +10,18 @@ import kotlin.io.path.pathString
 class AndroidLintCliInvoker(
   classLoader: ClassLoader,
 ) {
-
   private val mainClass = Class.forName("com.android.tools.lint.Main", true, classLoader)
   private val cliFlags = classLoader.loadClass("com.android.tools.lint.LintCliFlags")
-  private val mainInstance = mainClass
-    .getDeclaredConstructor()
-    .newInstance()
-  private val flagsInstance = mainClass.getDeclaredField("flags").apply {
-    isAccessible = true
-  }.get(mainInstance)
+  private val mainInstance =
+    mainClass
+      .getDeclaredConstructor()
+      .newInstance()
+  private val flagsInstance =
+    mainClass
+      .getDeclaredField("flags")
+      .apply {
+        isAccessible = true
+      }.get(mainInstance)
 
   /*
    * Exit Status:
@@ -37,15 +40,15 @@ class AndroidLintCliInvoker(
   }
 
   fun setCheckDependencies(enableCheckDependencies: Boolean) {
-    val setCheckDependenciesMethod = cliFlags.getDeclaredMethod(
-      "setCheckDependencies",
-      Boolean::class.java,
-    )
+    val setCheckDependenciesMethod =
+      cliFlags.getDeclaredMethod(
+        "setCheckDependencies",
+        Boolean::class.java,
+      )
     setCheckDependenciesMethod.invoke(flagsInstance, enableCheckDependencies)
   }
 
   companion object {
-
     const val ERRNO_SUCCESS = 0
     const val ERRNO_ERRORS = 1
     const val ERRNO_USAGE = 2
@@ -64,12 +67,14 @@ class AndroidLintCliInvoker(
         "Error: At least one jar must be provided when calling createUsingJars"
       }
 
-      val classpath = jars.map { jar ->
-        require(jar.isRegularFile() && jar.exists()) {
-          "Error: The provided jar does not exist!: ${jar.pathString}"
-        }
-        URL("file:${jar.pathString}")
-      }.toTypedArray()
+      val classpath =
+        jars
+          .map { jar ->
+            require(jar.isRegularFile() && jar.exists()) {
+              "Error: The provided jar does not exist!: ${jar.pathString}"
+            }
+            URL("file:${jar.pathString}")
+          }.toTypedArray()
 
       return AndroidLintCliInvoker(classLoader = URLClassLoader(classpath, parentClassloader))
     }

@@ -10,7 +10,6 @@ import java.nio.file.Path
 
 @RunWith(JUnit4::class)
 class AndroidLintProjectTest {
-
   @Rule
   @JvmField
   var tmpDirectory = TemporaryFolder()
@@ -28,12 +27,13 @@ class AndroidLintProjectTest {
         androidManifest = tmpDirectory.newPath("AndroidManifest.xml"),
         classpathJars = listOf(tmpDirectory.newPath("Foo.jar")),
         classpathAars = listOf(tmpDirectory.newPath("Foo.aar")),
-        classpathExtractedAarDirectories = listOf(
-          Pair(
-            tmpDirectory.newPath("Bar.aar"),
-            tmpDirectory.newFolder("tmp/unpacked_aars/bar/").toPath(),
+        classpathExtractedAarDirectories =
+          listOf(
+            Pair(
+              tmpDirectory.newPath("Bar.aar"),
+              tmpDirectory.newFolder("tmp/unpacked_aars/bar/").toPath(),
+            ),
           ),
-        ),
         customLintChecks = listOf(tmpDirectory.newPath("tmp/unpacked_aars/bar/lint.jar")),
       ),
     ).isEqualTo(

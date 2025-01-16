@@ -8,49 +8,50 @@ import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
 class AndroidLintActionArgsTest {
-
   @Test
   fun `does parse all arguments`() {
-    val parseArgs = AndroidLintActionArgs.parseArgs(
-      args = listOf(
-        "--label",
-        "test",
-        "--android-lint-cli-tool",
-        "path/to/cli.jar",
-        "--src",
-        "path/to/Foo.kt",
-        "--output",
-        "output.jar",
-        "--resource",
-        "path/to/resource/strings.xml",
-        "--android-manifest",
-        "AndroidManifest.xml",
-        "--baseline-file",
-        "lib_lint_baseline.xml",
-        "--config-file",
-        "lint_config.xml",
-        "--custom-rule",
-        "custom_rule.jar",
-        "--classpath",
-        "classpath.jar",
-        "--classpath",
-        "classpath.aar",
-        "--autofix",
-        "--regenerate-baseline-files",
-        "--warnings-as-errors",
-        "--enable-check",
-        "custom-check",
-        "--disable-check",
-        "custom-disabled-check",
-        "--compile-sdk-version",
-        "1.6",
-        "--java-language-level",
-        "1.7",
-        "--kotlin-language-level",
-        "1.8",
-        "--enable-check-dependencies",
-      ),
-    )
+    val parseArgs =
+      AndroidLintActionArgs.parseArgs(
+        args =
+          listOf(
+            "--label",
+            "test",
+            "--android-lint-cli-tool",
+            "path/to/cli.jar",
+            "--src",
+            "path/to/Foo.kt",
+            "--output",
+            "output.jar",
+            "--resource",
+            "path/to/resource/strings.xml",
+            "--android-manifest",
+            "AndroidManifest.xml",
+            "--baseline-file",
+            "lib_lint_baseline.xml",
+            "--config-file",
+            "lint_config.xml",
+            "--custom-rule",
+            "custom_rule.jar",
+            "--classpath",
+            "classpath.jar",
+            "--classpath",
+            "classpath.aar",
+            "--autofix",
+            "--regenerate-baseline-files",
+            "--warnings-as-errors",
+            "--enable-check",
+            "custom-check",
+            "--disable-check",
+            "custom-disabled-check",
+            "--compile-sdk-version",
+            "1.6",
+            "--java-language-level",
+            "1.7",
+            "--kotlin-language-level",
+            "1.8",
+            "--enable-check-dependencies",
+          ),
+      )
 
     assertThat(parseArgs.label).isEqualTo("test")
     assertThat(parseArgs.srcs).containsExactly(Paths.get("path/to/Foo.kt"))

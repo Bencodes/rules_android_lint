@@ -8,7 +8,6 @@ data class WorkRequest(
    */
   @Json(name = "requestId")
   val requestId: Int = 0,
-
   /**
    * The work request arguments
    */

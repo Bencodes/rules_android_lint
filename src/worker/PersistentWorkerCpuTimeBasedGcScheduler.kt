@@ -12,7 +12,6 @@ internal class PersistentWorkerCpuTimeBasedGcScheduler(
    */
   private val cpuUsageBeforeGc: Duration = Duration.ofSeconds(10),
 ) {
-
   private val cpuTime: Duration
     get() = if (!cpuUsageBeforeGc.isZero) Duration.ofNanos(bean.processCpuTime) else Duration.ZERO
 

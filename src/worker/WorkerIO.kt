@@ -8,7 +8,6 @@ internal class WorkerIO(
   val output: PrintStream = System.out,
   val err: PrintStream = System.err,
 ) : AutoCloseable {
-
   fun redirectSystemStreams(): WorkerIO {
     System.setOut(err)
     return this

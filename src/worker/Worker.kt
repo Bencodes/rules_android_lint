@@ -4,19 +4,19 @@ import java.io.IOException
 import java.io.PrintStream
 
 interface Worker {
-
   fun processRequests(): Int
 
   interface WorkRequestCallback {
-
     /**
      * Processes an individual work request.
      */
-    fun processWorkRequest(args: List<String>, printStream: PrintStream): Int
+    fun processWorkRequest(
+      args: List<String>,
+      printStream: PrintStream,
+    ): Int
   }
 
   interface WorkerMessageProcessor {
-
     @Throws(IOException::class)
     fun readWorkRequest(): WorkRequest
 
@@ -25,7 +25,6 @@ interface Worker {
   }
 
   companion object {
-
     /**
      * Creates the appropriate worker instance using the provided worker arguments.
      *
@@ -35,11 +34,10 @@ interface Worker {
     fun fromArgs(
       args: Array<String>,
       workerMessageProcessor: WorkRequestCallback,
-    ): Worker {
-      return when {
+    ): Worker =
+      when {
         "--persistent_worker" in args -> PersistentWorker(workerMessageProcessor)
         else -> InvocationWorker(args, workerMessageProcessor)
       }
-    }
   }
 }
