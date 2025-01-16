@@ -10,6 +10,8 @@ bazel_dep(name = "rules_jvm_external", version = "5.3")
 bazel_dep(name = "rules_kotlin", version = "2.1.0")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "bazel_worker_api", version = "0.0.4")
+bazel_dep(name = "bazel_worker_java", version = "0.0.4")
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.11.0", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.0.0", dev_dependency = True)
@@ -25,11 +27,9 @@ maven.install(
         "org.assertj:assertj-core:3.24.2",
         "junit:junit:4.13.2",
         # Worker Dependencies
-        # TODO(bencodes) Remove these and use the worker impl. that Bazel defines internally
-        "com.squareup.moshi:moshi:1.15.0",
-        "com.squareup.moshi:moshi-kotlin:1.15.0",
-        "com.squareup.okio:okio-jvm:3.6.0",
-        "io.reactivex.rxjava3:rxjava:3.1.8",
+        "com.google.protobuf:protobuf-java:4.29.0",
+        "com.google.protobuf:protobuf-java-util:4.29.0",
+        # Args Parsing
         "com.xenomachina:kotlin-argparser:2.0.7",
         # Lint Dependencies
         "com.android.tools.lint:lint:31.3.0-alpha09",

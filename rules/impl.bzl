@@ -143,7 +143,6 @@ def _run_android_lint(
         execution_requirements = {
             "supports-workers": "1",
             "supports-multiplex-workers": "1",
-            "requires-worker-protocol": "json",
         },
         env = {
             # https://googlesamples.github.io/android-custom-lint-rules/usage/variables.md.html
