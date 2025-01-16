@@ -9,7 +9,6 @@ kt_jvm_library(
     deps = [
         "@bazel_worker_java//:worker_protocol_java_proto",
         "@bazel_worker_java//src/main/java/com/google/devtools/build/lib/worker:work_request_handlers",
-        "@rules_android_lint_deps//:com_google_code_gson_gson",
         "@rules_android_lint_deps//:com_google_protobuf_protobuf_java",
     ],
 )
