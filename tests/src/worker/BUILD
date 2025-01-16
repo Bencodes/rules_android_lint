@@ -1,6 +1,6 @@
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_test")
-load("//rules:defs.bzl", "android_lint_test")
 load("@rules_kotlin//kotlin:lint.bzl", "ktlint_fix", "ktlint_test")
+load("//rules:defs.bzl", "android_lint_test")
 
 kt_jvm_test(
     name = "WorkerTest",
