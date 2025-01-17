@@ -7,6 +7,8 @@ Android Lint rules
 ## android_lint
 
 <pre>
+load("@rules_android_lint//rules:defs.bzl", "android_lint")
+
 android_lint(<a href="#android_lint-name">name</a>, <a href="#android_lint-deps">deps</a>, <a href="#android_lint-srcs">srcs</a>, <a href="#android_lint-android_lint_config">android_lint_config</a>, <a href="#android_lint-autofix">autofix</a>, <a href="#android_lint-custom_rules">custom_rules</a>, <a href="#android_lint-disable_checks">disable_checks</a>,
              <a href="#android_lint-enable_checks">enable_checks</a>, <a href="#android_lint-is_test_sources">is_test_sources</a>, <a href="#android_lint-lib">lib</a>, <a href="#android_lint-manifest">manifest</a>, <a href="#android_lint-resource_files">resource_files</a>, <a href="#android_lint-warnings_as_errors">warnings_as_errors</a>)
 </pre>
@@ -38,6 +40,8 @@ android_lint(<a href="#android_lint-name">name</a>, <a href="#android_lint-deps"
 ## android_lint_test
 
 <pre>
+load("@rules_android_lint//rules:defs.bzl", "android_lint_test")
+
 android_lint_test(<a href="#android_lint_test-name">name</a>, <a href="#android_lint_test-deps">deps</a>, <a href="#android_lint_test-srcs">srcs</a>, <a href="#android_lint_test-android_lint_config">android_lint_config</a>, <a href="#android_lint_test-autofix">autofix</a>, <a href="#android_lint_test-baseline">baseline</a>, <a href="#android_lint_test-custom_rules">custom_rules</a>,
                   <a href="#android_lint_test-disable_checks">disable_checks</a>, <a href="#android_lint_test-enable_checks">enable_checks</a>, <a href="#android_lint_test-is_test_sources">is_test_sources</a>, <a href="#android_lint_test-lib">lib</a>, <a href="#android_lint_test-manifest">manifest</a>, <a href="#android_lint_test-resource_files">resource_files</a>,
                   <a href="#android_lint_test-warnings_as_errors">warnings_as_errors</a>)
@@ -71,13 +75,14 @@ android_lint_test(<a href="#android_lint_test-name">name</a>, <a href="#android_
 ## AndroidLintResultsInfo
 
 <pre>
+load("@rules_android_lint//rules:defs.bzl", "AndroidLintResultsInfo")
+
 AndroidLintResultsInfo(<a href="#AndroidLintResultsInfo-output">output</a>)
 </pre>
 
 Info needed to evaluate lint results
 
 **FIELDS**
-
 
 | Name  | Description |
 | :------------- | :------------- |
