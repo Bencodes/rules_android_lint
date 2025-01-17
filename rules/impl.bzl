@@ -1,7 +1,15 @@
 """Rule implementation for Android Lint
 """
 
-load("@rules_java//java/common:java_info.bzl", "JavaInfo")
+load(
+    "@rules_android//providers:providers.bzl",
+    "AndroidLibraryAarInfo",
+    "AndroidLibraryResourceClassJarProvider",
+)
+load(
+    "@rules_java//java:defs.bzl",
+    "JavaInfo",
+)
 load(
     ":collect_aar_outputs_aspect.bzl",
     _AndroidLintAARInfo = "AndroidLintAARInfo",

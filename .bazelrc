@@ -1,3 +1,4 @@
 common --experimental_google_legacy_api
+common --check_visibility=false
 
 try-import %workspace%/.bazelrc.user
