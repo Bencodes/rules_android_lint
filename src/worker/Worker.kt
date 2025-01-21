@@ -1,6 +1,5 @@
 package com.rules.android.lint.worker
 
-import java.io.IOException
 import java.io.PrintStream
 
 interface Worker {
@@ -14,14 +13,6 @@ interface Worker {
       args: List<String>,
       printStream: PrintStream,
     ): Int
-  }
-
-  interface WorkerMessageProcessor {
-    @Throws(IOException::class)
-    fun readWorkRequest(): WorkRequest
-
-    @Throws(IOException::class)
-    fun writeWorkResponse(workResponse: WorkResponse)
   }
 
   companion object {

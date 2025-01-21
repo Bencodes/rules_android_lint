@@ -7,11 +7,9 @@ kt_jvm_library(
     srcs = glob(["*.kt"]),
     visibility = ["//visibility:public"],
     deps = [
-        "@rules_android_lint_deps//:com_squareup_moshi_moshi",
-        "@rules_android_lint_deps//:com_squareup_moshi_moshi_kotlin",
-        "@rules_android_lint_deps//:com_squareup_okio_okio_jvm",
-        "@rules_android_lint_deps//:io_reactivex_rxjava3_rxjava",
-        "@rules_android_lint_deps//:org_reactivestreams_reactive_streams",
+        "@bazel_worker_java//:worker_protocol_java_proto",
+        "@bazel_worker_java//src/main/java/com/google/devtools/build/lib/worker:work_request_handlers",
+        "@rules_android_lint_deps//:com_google_protobuf_protobuf_java",
     ],
 )
 
