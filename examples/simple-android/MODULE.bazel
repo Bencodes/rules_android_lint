@@ -29,6 +29,7 @@ register_toolchains("@androidsdk//:sdk-toolchain", "@androidsdk//:all")
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
+    aar_import_bzl_label = "@rules_android//rules:rules.bzl",
     artifacts = [
         "androidx.activity:activity:1.7.0",
     ],
@@ -36,5 +37,6 @@ maven.install(
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
+    use_starlark_android_rules = True,
 )
 use_repo(maven, "maven")
