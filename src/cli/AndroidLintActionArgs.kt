@@ -13,6 +13,10 @@ internal class AndroidLintActionArgs(
   private val argsParserPathTransformer: String.() -> Path = {
     Paths.get(this)
   }
+  private val argsParserAarPairPathTransformer: String.() -> Pair<Path, Path> = {
+    val (aar, aarDir) = this.split(":")
+    Pair(Paths.get(aar), Paths.get(aarDir))
+  }
 
   val androidLintCliTool: Path by parser.storing(
     names = arrayOf("--android-lint-cli-tool"),
@@ -80,9 +84,16 @@ internal class AndroidLintActionArgs(
 
   val classpath: List<Path> by parser
     .adding(
-      names = arrayOf("--classpath"),
+      names = arrayOf("--classpath-jar"),
       help = "",
       transform = argsParserPathTransformer,
+    ).default { emptyList() }
+
+  val classpathAarPairs: List<Pair<Path, Path>> by parser
+    .adding(
+      names = arrayOf("--classpath-aar"),
+      help = "",
+      transform = argsParserAarPairPathTransformer,
     ).default { emptyList() }
 
   val autofix: Boolean by parser

@@ -31,6 +31,7 @@ def _run_android_lint(
         output,
         srcs,
         deps,
+        aars,
         resource_files,
         manifest,
         compile_sdk_version,
@@ -55,6 +56,7 @@ def _run_android_lint(
         output: The output file
         srcs: The source files
         deps: Depset of aars and jars to include on the classpath
+        aars: Depset of the aar nodes
         resource_files: The Android resource files
         manifest: The Android manifest file
         compile_sdk_version: The Android compile SDK version
@@ -116,10 +118,17 @@ def _run_android_lint(
     for check in enable_checks:
         args.add("--enable-check", check)
     for dep in _utils.list_or_depset_to_list(deps):
-        if not dep.path.endswith(".aar") and not dep.path.endswith(".jar"):
-            continue
-        args.add("--classpath", dep)
+        if not dep.path.endswith(".jar"):
+            fail("Error: Found artifact that is not an aar: %s" % dep.path)
+        args.add("--classpath-jar", dep)
         inputs.append(dep)
+    for aar_node_info in _utils.list_or_depset_to_list(aars):
+        aar = aar_node_info.aar
+        aar_dir = aar_node_info.aar_dir
+        if aar and aar_dir:
+            args.add("--classpath-aar", "%s:%s" % (aar.path, aar_dir.path))
+            inputs.append(aar)
+            inputs.append(aar_dir)
     if android_lint_enable_check_dependencies:
         args.add("--enable-check-dependencies")
 
@@ -187,15 +196,23 @@ def process_android_lint_issues(ctx, regenerate):
 
     # Collect the transitive classpath jars to run lint against.
     deps = []
+    aars = []
     for dep in ctx.attr.deps:
         if JavaInfo in dep:
             deps.append(dep[JavaInfo].compile_jars)
         if AndroidLibraryResourceClassJarProvider in dep:
             deps.append(dep[AndroidLibraryResourceClassJarProvider].jars)
-        if AndroidLibraryAarInfo in dep:
-            deps.append(dep[AndroidLibraryAarInfo].transitive_aar_artifacts)
+        # aar_import targets.
         if _AndroidLintAARInfo in dep:
-            deps.append(dep[_AndroidLintAARInfo].aars)
+            direct = []
+            if dep[_AndroidLintAARInfo].aar:
+                direct = [dep[_AndroidLintAARInfo].aar]
+            aars.append(depset(
+                direct = direct,
+                transitive = [
+                    dep[_AndroidLintAARInfo].transitive_aar_artifacts,
+                ],
+            ))
 
     # Append the compiled R files for our self
     if ctx.attr.lib and AndroidLibraryResourceClassJarProvider in ctx.attr.lib:
@@ -217,6 +234,7 @@ def process_android_lint_issues(ctx, regenerate):
         output = output,
         srcs = ctx.files.srcs,
         deps = depset(transitive = deps),
+        aars = depset(transitive = aars),
         resource_files = ctx.files.resource_files,
         manifest = manifest,
         compile_sdk_version = _utils.get_android_lint_toolchain(ctx).compile_sdk_version,
