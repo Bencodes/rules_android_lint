@@ -3,7 +3,6 @@
 
 load(
     "@rules_android//providers:providers.bzl",
-    "AndroidLibraryAarInfo",
     "AndroidLibraryResourceClassJarProvider",
 )
 load(

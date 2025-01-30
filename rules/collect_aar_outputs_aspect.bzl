@@ -1,5 +1,6 @@
 """Aspect to collect the aar outputs from aar_import
 """
+
 load("@rules_android//providers:providers.bzl", "AndroidLibraryAarInfo")
 
 AndroidLintAARInfo = provider(
@@ -37,6 +38,7 @@ def _collect_aar_outputs_aspect(tgt, ctx):
         aar = ctx.rule.attr.aar.files.to_list()[0]
         # TODO(bencodes) I don't think we need this case since we should be able to extract the information we need
         # directly when constructing the lint action itself. Keeping for now though as it preserves the existing behavior.
+
     elif AndroidLibraryAarInfo in tgt:
         aar = tgt[AndroidLibraryAarInfo].aar
 
