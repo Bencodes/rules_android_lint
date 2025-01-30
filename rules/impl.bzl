@@ -202,7 +202,6 @@ def process_android_lint_issues(ctx, regenerate):
             deps.append(dep[JavaInfo].compile_jars)
         if AndroidLibraryResourceClassJarProvider in dep:
             deps.append(dep[AndroidLibraryResourceClassJarProvider].jars)
-        # aar_import targets.
         if _AndroidLintAARInfo in dep:
             direct = []
             if dep[_AndroidLintAARInfo].aar:
