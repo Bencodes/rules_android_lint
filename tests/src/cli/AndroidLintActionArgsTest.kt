@@ -32,10 +32,10 @@ class AndroidLintActionArgsTest {
             "lint_config.xml",
             "--custom-rule",
             "custom_rule.jar",
-            "--classpath",
+            "--classpath-jar",
             "classpath.jar",
-            "--classpath",
-            "classpath.aar",
+            "--classpath-aar",
+            "classpath.aar:aar_directory",
             "--autofix",
             "--regenerate-baseline-files",
             "--warnings-as-errors",
@@ -61,7 +61,9 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.config).isEqualTo(Paths.get("lint_config.xml"))
     assertThat(parseArgs.customChecks).containsExactly(Paths.get("custom_rule.jar"))
     assertThat(parseArgs.classpath)
-      .containsExactly(Paths.get("classpath.jar"), Paths.get("classpath.aar"))
+      .containsExactly(Paths.get("classpath.jar"))
+    assertThat(parseArgs.classpathAarPairs)
+      .containsExactly(Paths.get("classpath.aar") to Paths.get("aar_directory"))
     assertThat(parseArgs.autofix).isTrue
     assertThat(parseArgs.regenerateBaselineFile).isTrue
     assertThat(parseArgs.warningsAsErrors).isTrue

@@ -6,6 +6,9 @@ android_library(
     name = "lib",
     srcs = ["Foo.java"],
     custom_package = "com.rules.android.lint.examples",
+    deps = [
+        "@maven//:androidx_activity_activity",
+    ],
 )
 
 android_lint(
@@ -13,6 +16,9 @@ android_lint(
     srcs = ["Foo.java"],
     android_lint_config = "lint.xml",
     lib = ":lib",
+    deps = [
+        "@maven//:androidx_activity_activity",
+    ],
 )
 
 android_lint_test(

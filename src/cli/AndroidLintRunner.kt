@@ -3,14 +3,9 @@ package com.rules.android.lint.cli
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
-import kotlin.io.path.extension
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.name
 import kotlin.io.path.pathString
 import kotlin.io.path.writeText
 
@@ -26,18 +21,9 @@ internal class AndroidLintRunner {
       Files.copy(args.baselineFile!!, baselineFile)
     }
 
-    // Split the aars and jars
-    val aars = args.classpath.filter { it.extension == "aar" }
-    val jars = args.classpath.filter { it.extension == "jar" }
-    require(aars.size + jars.size == args.classpath.size) { "Error: Classpath size mismatch" }
-
-    // Unarchive the AARs to avoid lint having to do this work. This also prevents some
-    // concurrency issues inside of Lint when multiplex workers are enabled
-    val unpackedAars = unpackAars(aars, workingDirectory.resolve("aars"))
-
     // Collect the custom lint rules from the unpacked aars
     val aarLintRuleJars =
-      unpackedAars
+      args.classpathAarPairs
         .asSequence()
         .map { it.first.resolve("lint.jar") }
         .filter { it.exists() && it.isRegularFile() }
@@ -54,9 +40,9 @@ internal class AndroidLintRunner {
         srcs = args.srcs.sortedDescending(),
         resources = args.resources.sortedDescending(),
         androidManifest = args.androidManifest,
-        classpathJars = jars.sortedDescending(),
+        classpathJars = args.classpath.sortedDescending(),
         classpathAars = emptyList(),
-        classpathExtractedAarDirectories = unpackedAars,
+        classpathExtractedAarDirectories = args.classpathAarPairs,
         customLintChecks = (args.customChecks + aarLintRuleJars).sortedDescending(),
       ),
     )
@@ -145,24 +131,5 @@ internal class AndroidLintRunner {
 
     invoker.setCheckDependencies(actionArgs.enableCheckDependencies)
     return invoker.invoke(args.toTypedArray())
-  }
-
-  /**
-   * Takes a list of AARs and unarchives them into the provided directory
-   * with this structure: ${tmpDirectory}/${aarFileName}--aar-unzipped/
-   *
-   * This is a necessary workaround for Lint wanting to unpack these aars into a global
-   * shared directory, which causes lots of obscure concurrency issues inside of lint
-   * when operating in persistent worker mode.
-   */
-  private fun unpackAars(
-    aars: List<Path>,
-    dstDirectory: Path,
-    executorService: ExecutorService = Executors.newFixedThreadPool(6),
-  ): List<Pair<Path, Path>> {
-    val aarsToUnpack = aars.map { it to dstDirectory.resolve("${it.name}-aar-contents") }
-    aarsToUnpack.forEach { (src, dst) -> unzip(src, dst) }
-    executorService.awaitTermination(15, TimeUnit.SECONDS)
-    return aarsToUnpack.sortedBy { it.first }
   }
 }
