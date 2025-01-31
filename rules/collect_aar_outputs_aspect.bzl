@@ -30,7 +30,7 @@ def _collect_aar_outputs_aspect(tgt, ctx):
         if AndroidLintAARInfo in dep:
             transitive_aar_depsets.append(dep[AndroidLintAARInfo].transitive_aar_artifacts)
 
-    # Collect the direct arr artifact for the given target
+    # Collect the direct aar artifact for the given target
     aar = None
     if ctx.rule.kind == "aar_import":
         if not hasattr(ctx.rule.attr, "aar"):
