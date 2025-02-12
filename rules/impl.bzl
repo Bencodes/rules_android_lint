@@ -1,15 +1,11 @@
 """Rule implementation for Android Lint
 """
 
-load("@rules_java//java:defs.bzl", "java_common")
 load(
     "@rules_android//providers:providers.bzl",
     "AndroidLibraryResourceClassJarProvider",
 )
-load(
-    "@rules_java//java:defs.bzl",
-    "JavaInfo",
-)
+load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
 load(
     ":collect_aar_outputs_aspect.bzl",
     _AndroidLintAARInfo = "AndroidLintAARInfo",
@@ -256,7 +252,7 @@ def process_android_lint_issues(ctx, regenerate):
         regenerate = regenerate,
         android_lint_enable_check_dependencies = _utils.get_android_lint_toolchain(ctx).android_lint_enable_check_dependencies,
         android_lint_skip_bytecode_verifier = _utils.get_android_lint_toolchain(ctx).android_lint_skip_bytecode_verifier,
-        android_lint_toolchain =  _utils.get_android_lint_toolchain(ctx),
+        android_lint_toolchain = _utils.get_android_lint_toolchain(ctx),
         java_runtime_info = ctx.attr._javabase[java_common.JavaRuntimeInfo],
     )
 
