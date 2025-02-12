@@ -129,6 +129,12 @@ internal class AndroidLintRunner {
       args.add(androidHomePath)
     }
 
+    if (actionArgs.jdkHome != null) {
+      val jdkHome = actionArgs.jdkHome!!
+      args.add("--jdk-home")
+      args.add(jdkHome.absolutePathString())
+    }
+
     invoker.setCheckDependencies(actionArgs.enableCheckDependencies)
     return invoker.invoke(args.toTypedArray())
   }

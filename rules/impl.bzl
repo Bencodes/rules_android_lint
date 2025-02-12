@@ -5,10 +5,7 @@ load(
     "@rules_android//providers:providers.bzl",
     "AndroidLibraryResourceClassJarProvider",
 )
-load(
-    "@rules_java//java:defs.bzl",
-    "JavaInfo",
-)
+load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
 load(
     ":collect_aar_outputs_aspect.bzl",
     _AndroidLintAARInfo = "AndroidLintAARInfo",
@@ -45,7 +42,9 @@ def _run_android_lint(
         autofix,
         regenerate,
         android_lint_enable_check_dependencies,
-        android_lint_skip_bytecode_verifier):
+        android_lint_skip_bytecode_verifier,
+        android_lint_toolchain,
+        java_runtime_info):
     """Constructs the Android Lint actions
 
     Args:
@@ -71,6 +70,8 @@ def _run_android_lint(
         regenerate: Whether to regenerate the baseline files
         android_lint_enable_check_dependencies: Enables dependency checking during analysis
         android_lint_skip_bytecode_verifier: Disables bytecode verification
+        android_lint_toolchain: The android lint toolchain
+        java_runtime_info: The java runtime toolchain info
     """
     inputs = []
     outputs = [output]
@@ -135,9 +136,12 @@ def _run_android_lint(
     args.add("--output", output)
     outputs.append(output)
 
-    toolchain = _utils.get_android_lint_toolchain(ctx)
-    if toolchain.android_home != None:
-        args.add("--android-home", toolchain.android_home.label.workspace_root)
+    if android_lint_toolchain.android_home != None:
+        args.add("--android-home", android_lint_toolchain.android_home.label.workspace_root)
+
+    if java_runtime_info:
+        args.add("--jdk-home", java_runtime_info.java_home)
+        inputs.extend(java_runtime_info.files.to_list())
 
     ctx.actions.run(
         mnemonic = "AndroidLint",
@@ -248,6 +252,8 @@ def process_android_lint_issues(ctx, regenerate):
         regenerate = regenerate,
         android_lint_enable_check_dependencies = _utils.get_android_lint_toolchain(ctx).android_lint_enable_check_dependencies,
         android_lint_skip_bytecode_verifier = _utils.get_android_lint_toolchain(ctx).android_lint_skip_bytecode_verifier,
+        android_lint_toolchain = _utils.get_android_lint_toolchain(ctx),
+        java_runtime_info = ctx.attr._javabase[java_common.JavaRuntimeInfo],
     )
 
     return struct(

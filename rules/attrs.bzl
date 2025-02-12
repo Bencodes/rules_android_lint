@@ -77,5 +77,8 @@ ATTRS = dict(
         default = [],
         doc = "Custom lint rules to run.",
     ),
+    _javabase = attr.label(
+        default = "@bazel_tools//tools/jdk:current_java_runtime",
+    ),
     _use_auto_exec_groups = attr.bool(default = True),
 )

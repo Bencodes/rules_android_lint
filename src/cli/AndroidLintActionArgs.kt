@@ -35,6 +35,13 @@ internal class AndroidLintActionArgs(
       help = "The relative location of Android home",
     ).default { null }
 
+  val jdkHome: Path? by parser
+    .storing(
+      names = arrayOf("--jdk-home"),
+      help = "The relative location of JDK home",
+      transform = argsParserPathTransformer,
+    ).default { null }
+
   val srcs: List<Path> by parser.adding(
     names = arrayOf("--src"),
     help = "",
