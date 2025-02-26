@@ -30,7 +30,7 @@ maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     aar_import_bzl_label = "@rules_android//rules:rules.bzl",
     artifacts = [
-        "androidx.activity:activity:1.10.0",
+        "androidx.activity:activity:1.10.1",
     ],
     repositories = [
         "https://maven.google.com",
