@@ -12,7 +12,7 @@ local_path_override(
 )
 
 bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "rules_android", version = "0.6.5")
+bazel_dep(name = "rules_android", version = "0.6.4")
 bazel_dep(name = "rules_jvm_external", version = "6.7")
 
 remote_android_extensions = use_extension(
