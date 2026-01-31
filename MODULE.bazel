@@ -4,17 +4,18 @@ module(
     compatibility_level = 1,
 )
 
-bazel_dep(name = "rules_android", version = "0.6.1")
-bazel_dep(name = "rules_java", version = "8.6.3")
-bazel_dep(name = "rules_jvm_external", version = "6.7")
-bazel_dep(name = "rules_kotlin", version = "2.1.0")
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "platforms", version = "0.0.8")
-bazel_dep(name = "bazel_worker_api", version = "0.0.4")
-bazel_dep(name = "bazel_worker_java", version = "0.0.4")
+bazel_dep(name = "rules_android", version = "0.7.1")
+bazel_dep(name = "rules_java", version = "9.3.0")
+bazel_dep(name = "rules_jvm_external", version = "6.9")
+bazel_dep(name = "rules_kotlin", version = "2.2.2")
+bazel_dep(name = "rules_python", version = "1.7.0")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "bazel_worker_api", version = "0.0.10")
+bazel_dep(name = "bazel_worker_java", version = "0.0.10")
 
-bazel_dep(name = "aspect_bazel_lib", version = "2.11.0", dev_dependency = True)
-bazel_dep(name = "buildifier_prebuilt", version = "8.0.0", dev_dependency = True)
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.5", dev_dependency = True)
+bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.2", dev_dependency = True)
 
 register_toolchains("//toolchains:android_lint_default_toolchain")
 

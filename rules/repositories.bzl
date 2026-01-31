@@ -1,8 +1,14 @@
-"""Declare runtime dependencies
+"""Declare runtime dependencies.
+
+Dependencies are declared in MODULE.bazel via Bzlmod.
 """
 
-# buildifier: disable=unnamed-macro
-def android_lint_register_toolchains():
+def android_lint_register_toolchains(name = "android_lint_toolchains"):
     """Convenience macro for users which does typical setup.
+
+    This registers the default android_lint toolchain.
+
+    Args:
+        name: Name for this macro invocation (unused, required by convention).
     """
-    pass
+    native.register_toolchains("@rules_android_lint//toolchains:android_lint_default_toolchain")
