@@ -34,8 +34,7 @@ android_lint = rule(
     implementation = _impl,
     attrs = _dicts.add(
         _ATTRS,
-        dict(
-        ),
+        dict(),
     ),
     provides = [
         _AndroidLintResultsInfo,
