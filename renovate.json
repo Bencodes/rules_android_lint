@@ -10,7 +10,7 @@
   ],
   "packageRules": [
     {
-      "matchFiles": [
+      "matchFileNames": [
         "MODULE.bazel"
       ],
       "enabled": false
