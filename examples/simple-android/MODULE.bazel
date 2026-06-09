@@ -11,9 +11,9 @@ local_path_override(
     path = "../../",
 )
 
-bazel_dep(name = "platforms", version = "1.0.0")
-bazel_dep(name = "rules_android", version = "0.7.2")
-bazel_dep(name = "rules_jvm_external", version = "6.10")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_android", version = "0.7.3")
+bazel_dep(name = "rules_jvm_external", version = "7.0")
 
 remote_android_extensions = use_extension(
     "@rules_android//bzlmod_extensions:android_extensions.bzl",
