@@ -116,4 +116,25 @@ function test_worker_and_local_strategies_agree() {
   expect_log "DefaultLocale"
 }
 
+function test_custom_rules_jar_flags_compose_issue() {
+  write_composable_annotation_stub
+  write_dirty_composable
+  copy_compose_lint_checks
+  write_custom_rules_lint_targets
+
+  "${BIT_BAZEL_BINARY}" test --test_output=all //:lib_lint_test >& "$TEST_log" \
+    && fail "Expected lint test with custom compose-lints rules to fail" || true
+  expect_log "ComposeNamingUppercase"
+}
+
+function test_custom_rules_jar_accepts_clean_composable() {
+  write_composable_annotation_stub
+  write_clean_composable
+  copy_compose_lint_checks
+  write_custom_rules_lint_targets
+
+  "${BIT_BAZEL_BINARY}" test --test_output=all //:lib_lint_test >& "$TEST_log" \
+    || fail "Expected lint test with custom compose-lints rules to pass"
+}
+
 run_suite "android_lint rule behavior scenarios"

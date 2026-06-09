@@ -164,3 +164,193 @@ public class Foo {
 }
 EOF
 }
+
+# Copies the compose-lint-checks jar (the custom-rule test fixture) into the CWD.
+function copy_compose_lint_checks() {
+  cp -L "$(rlocation rules_android_lint/tests/scripts/compose_lint_checks.jar)" \
+    compose_lint_checks.jar
+}
+
+# A source-level stand-in for androidx.compose.runtime.Composable so the compose-lints
+# checks can resolve the annotation without the Compose runtime on the classpath.
+function write_composable_annotation_stub() {
+  cat > Composable.kt <<EOF
+package androidx.compose.runtime
+
+@Target(
+  AnnotationTarget.FUNCTION,
+  AnnotationTarget.TYPE,
+  AnnotationTarget.TYPE_PARAMETER,
+  AnnotationTarget.PROPERTY_GETTER,
+)
+annotation class Composable
+EOF
+
+  cat > Modifier.kt <<EOF
+package androidx.compose.ui
+
+interface Modifier {
+  companion object : Modifier
+}
+EOF
+
+  # A leaf composable for fixtures to call so they actually "use composition";
+  # the suppression keeps the stub itself out of ComposeRedundantComposable.
+  cat > Stubs.kt <<EOF
+package com.example
+
+import androidx.compose.runtime.Composable
+
+@Suppress("ComposeRedundantComposable")
+@Composable
+fun Text(text: String) {
+}
+EOF
+}
+
+# A unit-returning composable whose lowercase name trips ComposeNamingUppercase.
+function write_dirty_composable() {
+  cat > MyComposables.kt <<EOF
+package com.example
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun badButton(modifier: Modifier = Modifier) {
+  Text("hello")
+}
+EOF
+}
+
+# A correctly named composable that compose-lints accepts.
+function write_clean_composable() {
+  cat > MyComposables.kt <<EOF
+package com.example
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun GoodButton(modifier: Modifier = Modifier) {
+  Text("hello")
+}
+EOF
+}
+
+# Extends the consumer workspace with rules_android and an SDK so aar_import works.
+# Requires ANDROID_HOME in the environment.
+function enable_android_in_workspace() {
+  cat >> MODULE.bazel <<EOF
+
+bazel_dep(name = "rules_android", version = "0.7.1")
+
+remote_android_extensions = use_extension(
+    "@rules_android//bzlmod_extensions:android_extensions.bzl",
+    "remote_android_tools_extensions",
+)
+use_repo(remote_android_extensions, "android_tools")
+
+android_sdk_repository_extension = use_extension(
+    "@rules_android//rules/android_sdk_repository:rule.bzl",
+    "android_sdk_repository_extension",
+)
+use_repo(android_sdk_repository_extension, "androidsdk")
+
+register_toolchains("@androidsdk//:sdk-toolchain", "@androidsdk//:all")
+EOF
+
+  cat >> .bazelrc <<EOF
+common --experimental_google_legacy_api
+EOF
+}
+
+# Builds a minimal AAR in the CWD with the compose-lints jar embedded as its lint.jar,
+# exercising the collect_aar_outputs_aspect extraction + lint.jar auto-discovery path.
+function write_fixture_aar() {
+  copy_compose_lint_checks
+  python3 - <<'PYEOF'
+import io
+import zipfile
+
+classes = io.BytesIO()
+zipfile.ZipFile(classes, "w").close()
+
+with zipfile.ZipFile("fixture.aar", "w") as aar:
+    aar.writestr(
+        "AndroidManifest.xml",
+        '<manifest xmlns:android="http://schemas.android.com/apk/res/android" '
+        'package="com.example.aarfixture"/>',
+    )
+    aar.writestr("classes.jar", classes.getvalue())
+    aar.writestr("R.txt", "")
+    aar.write("compose_lint_checks.jar", "lint.jar")
+PYEOF
+}
+
+# Lint targets that depend on the fixture AAR; custom checks must be discovered from the
+# AAR's embedded lint.jar rather than the custom_rules attribute.
+function write_aar_dep_lint_targets() {
+  cat > BUILD.bazel <<EOF
+load("@rules_android//rules:rules.bzl", "aar_import")
+load("@rules_android_lint//rules:defs.bzl", "android_lint_test")
+
+aar_import(
+    name = "fixture_aar",
+    aar = "fixture.aar",
+)
+
+filegroup(
+    name = "lib",
+    srcs = [
+        "Composable.kt",
+        "Modifier.kt",
+        "MyComposables.kt",
+        "Stubs.kt",
+    ],
+)
+
+android_lint_test(
+    name = "lib_lint_test",
+    srcs = [
+        "Composable.kt",
+        "Modifier.kt",
+        "MyComposables.kt",
+        "Stubs.kt",
+    ],
+    lib = ":lib",
+    warnings_as_errors = True,
+    deps = [":fixture_aar"],
+)
+EOF
+}
+
+# Lint targets whose custom checks come from the compose-lints jar via custom_rules.
+function write_custom_rules_lint_targets() {
+  cat > BUILD.bazel <<EOF
+load("@rules_android_lint//rules:defs.bzl", "android_lint_test")
+
+filegroup(
+    name = "lib",
+    srcs = [
+        "Composable.kt",
+        "Modifier.kt",
+        "MyComposables.kt",
+        "Stubs.kt",
+    ],
+)
+
+android_lint_test(
+    name = "lib_lint_test",
+    srcs = [
+        "Composable.kt",
+        "Modifier.kt",
+        "MyComposables.kt",
+        "Stubs.kt",
+    ],
+    custom_rules = ["compose_lint_checks.jar"],
+    lib = ":lib",
+    warnings_as_errors = True,
+)
+EOF
+}
