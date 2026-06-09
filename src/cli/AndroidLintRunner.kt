@@ -9,7 +9,9 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
 import kotlin.io.path.writeText
 
-internal class AndroidLintRunner {
+internal class AndroidLintRunner(
+  private val invokerCache: AndroidLintCliInvokerCache,
+) {
   internal fun runAndroidLint(
     args: AndroidLintActionArgs,
     workingDirectory: Path,
@@ -50,16 +52,20 @@ internal class AndroidLintRunner {
     // Run Android Lint
     val androidCacheFolder = workingDirectory.resolve("android-cache")
     Files.createDirectory(androidCacheFolder)
-    val invoker = AndroidLintCliInvoker.createUsingJars(jars = arrayOf(args.androidLintCliTool))
+    val invoker = invokerCache.acquire(listOf(args.androidLintCliTool))
     val exitCode =
-      invokeAndroidLintCLI(
-        invoker = invoker,
-        actionArgs = args,
-        rootDirPath = rootDir,
-        projectFilePath = projectFile,
-        baselineFilePath = baselineFile,
-        cacheDirectoryPath = androidCacheFolder,
-      )
+      try {
+        invokeAndroidLintCLI(
+          invoker = invoker,
+          actionArgs = args,
+          rootDirPath = rootDir,
+          projectFilePath = projectFile,
+          baselineFilePath = baselineFile,
+          cacheDirectoryPath = androidCacheFolder,
+        )
+      } finally {
+        invokerCache.release(invoker)
+      }
 
     return when (exitCode) {
       AndroidLintCliInvoker.ERRNO_SUCCESS,
@@ -135,7 +141,9 @@ internal class AndroidLintRunner {
       args.add(jdkHome.absolutePathString())
     }
 
-    invoker.setCheckDependencies(actionArgs.enableCheckDependencies)
-    return invoker.invoke(args.toTypedArray())
+    return invoker.invoke(
+      args = args.toTypedArray(),
+      enableCheckDependencies = actionArgs.enableCheckDependencies,
+    )
   }
 }

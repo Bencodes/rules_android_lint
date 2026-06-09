@@ -8,8 +8,8 @@ kt_jvm_test(
     associates = ["//src/cli:lint"],
     test_class = "com.rules.android.lint.cli.AndroidLintActionArgsTest",
     deps = [
-        "@rules_android_lint_deps//:junit_junit",
-        "@rules_android_lint_deps//:org_assertj_assertj_core",
+        "@rules_android_lint_test_deps//:junit_junit",
+        "@rules_android_lint_test_deps//:org_assertj_assertj_core",
     ],
 )
 
@@ -26,8 +26,21 @@ kt_jvm_test(
     associates = ["//src/cli:lint"],
     test_class = "com.rules.android.lint.cli.AndroidLintActionTest",
     deps = [
-        "@rules_android_lint_deps//:junit_junit",
-        "@rules_android_lint_deps//:org_assertj_assertj_core",
+        "//tests/src/cli/stubs",
+        "@rules_android_lint_test_deps//:junit_junit",
+        "@rules_android_lint_test_deps//:org_assertj_assertj_core",
+    ],
+)
+
+kt_jvm_test(
+    name = "AndroidLintCliInvokerCacheTest",
+    srcs = ["AndroidLintCliInvokerCacheTest.kt"],
+    associates = ["//src/cli:lint"],
+    test_class = "com.rules.android.lint.cli.AndroidLintCliInvokerCacheTest",
+    deps = [
+        "//tests/src/cli/stubs",
+        "@rules_android_lint_test_deps//:junit_junit",
+        "@rules_android_lint_test_deps//:org_assertj_assertj_core",
     ],
 )
 
@@ -44,8 +57,8 @@ kt_jvm_test(
     associates = ["//src/cli:lint"],
     test_class = "com.rules.android.lint.cli.AndroidLintProjectTest",
     deps = [
-        "@rules_android_lint_deps//:junit_junit",
-        "@rules_android_lint_deps//:org_assertj_assertj_core",
+        "@rules_android_lint_test_deps//:junit_junit",
+        "@rules_android_lint_test_deps//:org_assertj_assertj_core",
     ],
 )
 
@@ -75,6 +88,7 @@ test_suite(
     tests = [
         ":AndroidLintActionArgsTest",
         ":AndroidLintActionTest",
+        ":AndroidLintCliInvokerCacheTest",
         ":AndroidLintProjectTest",
     ],
 )
