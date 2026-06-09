@@ -8,8 +8,8 @@ kt_jvm_test(
     associates = ["//src/worker"],
     test_class = "com.rules.android.lint.worker.WorkerTest",
     deps = [
-        "@rules_android_lint_deps//:junit_junit",
-        "@rules_android_lint_deps//:org_assertj_assertj_core",
+        "@rules_android_lint_test_deps//:junit_junit",
+        "@rules_android_lint_test_deps//:org_assertj_assertj_core",
     ],
 )
 

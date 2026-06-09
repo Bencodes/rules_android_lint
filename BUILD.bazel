@@ -3,6 +3,7 @@ load("@rules_kotlin//kotlin:lint.bzl", "ktlint_config")
 exports_files([
     ".bazelversion",
     "maven_install.json",
+    "maven_install_test.json",
 ])
 
 ktlint_config(

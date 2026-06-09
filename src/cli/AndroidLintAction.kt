@@ -13,7 +13,9 @@ object AndroidLintAction {
     exitProcess(exitCode)
   }
 
-  private class AndroidLintExecutor : Worker.WorkRequestCallback {
+  internal class AndroidLintExecutor(
+    private val invokerCache: AndroidLintCliInvokerCache = AndroidLintCliInvokerCache(),
+  ) : Worker.WorkRequestCallback {
     override fun processWorkRequest(
       args: List<String>,
       printStream: PrintStream,
@@ -21,7 +23,7 @@ object AndroidLintAction {
       val workingDirectory = Files.createTempDirectory("rules")
 
       try {
-        val runner = AndroidLintRunner()
+        val runner = AndroidLintRunner(invokerCache)
         val parsedArgs = AndroidLintActionArgs.parseArgs(args)
         runner.runAndroidLint(parsedArgs, workingDirectory)
         return 0
