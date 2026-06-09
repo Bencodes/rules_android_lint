@@ -43,10 +43,10 @@ maven.install(
         # Args Parsing
         "com.xenomachina:kotlin-argparser:2.0.7",
         # Lint Dependencies
-        "com.android.tools.lint:lint:31.3.0-alpha09",
-        "com.android.tools.lint:lint-api:31.3.0-alpha09",
-        "com.android.tools.lint:lint-checks:31.3.0-alpha09",
-        "com.android.tools.lint:lint-model:31.3.0-alpha09",
+        "com.android.tools.lint:lint:32.2.1",
+        "com.android.tools.lint:lint-api:32.2.1",
+        "com.android.tools.lint:lint-checks:32.2.1",
+        "com.android.tools.lint:lint-model:32.2.1",
     ],
     lock_file = "//:maven_install.json",
     repositories = [
