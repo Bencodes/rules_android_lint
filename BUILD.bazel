@@ -1,6 +1,9 @@
 load("@rules_kotlin//kotlin:lint.bzl", "ktlint_config")
 
-exports_files(["maven_install.json"])
+exports_files([
+    ".bazelversion",
+    "maven_install.json",
+])
 
 ktlint_config(
     name = "editorconfig",
