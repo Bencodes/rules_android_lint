@@ -65,6 +65,8 @@ maven_test.install(
     artifacts = [
         "org.assertj:assertj-core:3.24.2",
         "junit:junit:4.13.2",
+        # Custom lint check used as a test fixture by //tests/scripts
+        "com.slack.lint.compose:compose-lint-checks:1.5.2",
     ],
     lock_file = "//:maven_install_test.json",
     repositories = [
