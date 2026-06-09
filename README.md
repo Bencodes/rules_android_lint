@@ -17,6 +17,29 @@ This repository contains Bazel rules for running Android Lint.
 
 ## Getting Started
 
+### Requirements
+
+The bundled Android Lint (32.x) ships Java 17 bytecode, so the lint worker must run on a
+Java 17+ runtime. Add the following to your `.bazelrc` if you don't already target 17+:
+
+```
+common --java_runtime_version=remotejdk_17
+common --tool_java_runtime_version=remotejdk_17
+```
+
+### Using a different Android Lint version
+
+The lint binary is supplied by the toolchain. To pin your own version, build a deploy jar
+from `com.android.tools.lint:lint` in your own `maven.install(...)` and point the toolchain
+at it:
+
+```python
+android_lint_toolchain(
+    name = "my_android_lint",
+    android_lint = ":my_lint_deploy.jar",
+)
+```
+
 ### MODULE.bazel
 
 To use these rules, add the following to your `MODULE.bazel`:
