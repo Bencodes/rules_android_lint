@@ -105,3 +105,9 @@ bzl_library(
     srcs = ["collect_aar_outputs_aspect.bzl"],
     visibility = ["//visibility:public"],
 )
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+    visibility = ["//tests:__subpackages__"],
+)
