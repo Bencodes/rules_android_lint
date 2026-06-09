@@ -1,3 +1,10 @@
 common --lockfile_mode=off
 common --experimental_google_legacy_api
 test --test_output=all
+
+# Lint 32.x ships Java 17 bytecode; the lint worker must run on a 17+ JVM.
+# JDK 17 is the standard across the Android rules.
+common --java_language_version=17
+common --java_runtime_version=remotejdk_17
+common --tool_java_language_version=17
+common --tool_java_runtime_version=remotejdk_17
