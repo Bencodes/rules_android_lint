@@ -5,3 +5,9 @@ py_binary(
     srcs = ["android_lint_output_validator.py"],
     visibility = ["//visibility:public"],
 )
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+    visibility = ["//tests:__subpackages__"],
+)
