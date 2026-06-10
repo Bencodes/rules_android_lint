@@ -26,17 +26,7 @@ function set_up() {
   enable_android_in_workspace
 }
 
-# Skips the calling test when no Android SDK is available.
-function require_android_home() {
-  if [[ -z "${ANDROID_HOME:-}" ]]; then
-    echo "ANDROID_HOME is not set; skipping AAR scenario"
-    return 1
-  fi
-  return 0
-}
-
 function test_aar_embedded_lint_jar_flags_issue() {
-  require_android_home || return 0
   write_composable_annotation_stub
   write_dirty_composable
   write_fixture_aar
@@ -48,7 +38,6 @@ function test_aar_embedded_lint_jar_flags_issue() {
 }
 
 function test_aar_embedded_lint_jar_accepts_clean_composable() {
-  require_android_home || return 0
   write_composable_annotation_stub
   write_clean_composable
   write_fixture_aar

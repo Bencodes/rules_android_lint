@@ -43,9 +43,9 @@ script_test(
     name = "android_lint_aar_scenarios_test",
     size = "enormous",
     srcs = ["android_lint_aar_scenarios_test.sh"],
+    additional_env_inherit = ["ANDROID_HOME"],
     bazel_binaries = bazel_binaries,
     bazel_version = bazel_binaries.versions.current,
-    env_inherit = ["ANDROID_HOME"],
     tags = ["exclusive"],
     deps = [
         ":lint_helper",
