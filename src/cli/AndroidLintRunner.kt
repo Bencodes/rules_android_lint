@@ -27,7 +27,7 @@ internal class AndroidLintRunner(
     val aarLintRuleJars =
       args.classpathAarPairs
         .asSequence()
-        .map { it.first.resolve("lint.jar") }
+        .map { it.second.resolve("lint.jar") }
         .filter { it.exists() && it.isRegularFile() }
 
     // Create the project configuration file for lint
