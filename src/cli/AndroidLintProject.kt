@@ -10,6 +10,18 @@ import javax.xml.transform.stream.StreamResult
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.pathString
 
+/**
+ * A first-party dependency module contributing partial analysis results to the report phase.
+ *
+ * In the report (`--report-only`) phase lint merges these modules' partial results into the main
+ * module's verdict without re-analyzing their sources. Each is registered as a library module
+ * carrying its own `partial-results-dir` and linked from the main module via a `<dep>` element.
+ */
+internal data class LintDependencyModule(
+  val name: String,
+  val partialResultsDir: Path,
+)
+
 internal fun createProjectXMLString(
   moduleName: String,
   rootDir: String,
@@ -20,6 +32,12 @@ internal fun createProjectXMLString(
   classpathAars: List<Path>,
   classpathExtractedAarDirectories: List<Pair<Path, Path>>,
   customLintChecks: List<Path>,
+  partialResultsDir: Path? = null,
+  dependencyModules: List<LintDependencyModule> = emptyList(),
+  // Scratch partial-results directory assigned to AAR dependency projects during partial
+  // analysis. These projects are not analyzed, but lint's partial-analysis detectors dereference
+  // every project's partial-results-dir (e.g. JoinEffectDetector), so it must be non-null.
+  aarPartialResultsScratchDir: Path? = null,
 ): String {
   val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()
 
@@ -35,6 +53,11 @@ internal fun createProjectXMLString(
     document.createElement("module").also {
       it.setAttribute("name", moduleName)
       it.setAttribute("android", if (androidManifest != null) "true" else "false")
+      // The partial-results-dir is where lint writes results in `--analyze-only` and reads them
+      // back in `--report-only`. Absent in the legacy single-shot mode.
+      if (partialResultsDir != null) {
+        it.setAttribute("partial-results-dir", partialResultsDir.absolutePathString())
+      }
       // it.setAttribute("library", "false")
       // it.setAttribute("compile-sdk-version", "get-actual-value-here")
       projectElement.appendChild(it)
@@ -74,6 +97,9 @@ internal fun createProjectXMLString(
   classpathAars.forEach { aar ->
     val element = document.createElement("aar")
     element.setAttribute("file", aar.absolutePathString())
+    if (aarPartialResultsScratchDir != null) {
+      element.setAttribute("partial-results-dir", aarPartialResultsScratchDir.absolutePathString())
+    }
     moduleElement.appendChild(element)
   }
 
@@ -81,7 +107,28 @@ internal fun createProjectXMLString(
     val element = document.createElement("aar")
     element.setAttribute("file", aar.absolutePathString())
     element.setAttribute("extracted", unzippedDir.absolutePathString())
+    if (aarPartialResultsScratchDir != null) {
+      element.setAttribute("partial-results-dir", aarPartialResultsScratchDir.absolutePathString())
+    }
     moduleElement.appendChild(element)
+  }
+
+  // Link the main module to each first-party dependency that contributed partial results, then
+  // register those dependencies as library modules carrying their own partial-results-dir.
+  dependencyModules.forEach { dependency ->
+    document.createElement("dep").also {
+      it.setAttribute("module", dependency.name)
+      moduleElement.appendChild(it)
+    }
+  }
+
+  dependencyModules.forEach { dependency ->
+    document.createElement("module").also {
+      it.setAttribute("name", dependency.name)
+      it.setAttribute("library", "true")
+      it.setAttribute("partial-results-dir", dependency.partialResultsDir.absolutePathString())
+      projectElement.appendChild(it)
+    }
   }
 
   return StringWriter()

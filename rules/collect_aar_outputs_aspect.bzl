@@ -74,4 +74,5 @@ def _collect_aar_outputs_aspect(tgt, ctx):
 collect_aar_outputs_aspect = aspect(
     implementation = _collect_aar_outputs_aspect,
     attr_aspects = ["aar", "deps", "exports", "associates"],
+    provides = [AndroidLintAARInfo],
 )
