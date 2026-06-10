@@ -76,5 +76,44 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.javaLanguageLevel).isEqualTo("1.7")
     assertThat(parseArgs.kotlinLanguageLevel).isEqualTo("1.8")
     assertThat(parseArgs.enableCheckDependencies).isTrue()
+    // Mode defaults to legacy when not specified.
+    assertThat(parseArgs.mode).isEqualTo("legacy")
+  }
+
+  @Test
+  fun `does parse analyze and report mode arguments`() {
+    val parseArgs =
+      AndroidLintActionArgs.parseArgs(
+        args =
+          listOf(
+            "--label",
+            "test",
+            "--android-lint-cli-tool",
+            "path/to/cli.jar",
+            "--mode",
+            "report",
+            "--partial-results",
+            "path/to/partial",
+            "--dependency-partial-results",
+            "dep_a=path/to/dep_a/partial",
+            "--dependency-partial-results",
+            "dep_b=path/to/dep_b/partial",
+            "--compile-sdk-version",
+            "34",
+            "--java-language-level",
+            "17",
+            "--kotlin-language-level",
+            "1.9",
+          ),
+      )
+
+    assertThat(parseArgs.mode).isEqualTo("report")
+    assertThat(parseArgs.partialResults).isEqualTo(Paths.get("path/to/partial"))
+    assertThat(parseArgs.dependencyPartialResults).containsExactly(
+      "dep_a" to Paths.get("path/to/dep_a/partial"),
+      "dep_b" to Paths.get("path/to/dep_b/partial"),
+    )
+    // Output is optional now; absent here.
+    assertThat(parseArgs.output).isNull()
   }
 }

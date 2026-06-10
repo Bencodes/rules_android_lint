@@ -5,6 +5,10 @@ load(
     ":collect_aar_outputs_aspect.bzl",
     _collect_aar_outputs_aspect = "collect_aar_outputs_aspect",
 )
+load(
+    ":lint_analysis_aspect.bzl",
+    _lint_analysis_aspect = "lint_analysis_aspect",
+)
 
 ATTRS = dict(
     _lint_wrapper = attr.label(
@@ -38,7 +42,7 @@ ATTRS = dict(
         mandatory = False,
         allow_empty = True,
         default = [],
-        aspects = [_collect_aar_outputs_aspect],
+        aspects = [_collect_aar_outputs_aspect, _lint_analysis_aspect],
         doc = "Dependencies that should be on the classpath during execution.",
     ),
     android_lint_config = attr.label(

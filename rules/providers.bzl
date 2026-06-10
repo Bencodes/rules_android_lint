@@ -7,3 +7,15 @@ AndroidLintResultsInfo = provider(
         "output": "The Android Lint baseline output",
     },
 )
+
+AndroidLintPartialResultsInfo = provider(
+    "Per-target Android Lint analysis (--analyze-only) outputs, propagated up the dependency " +
+    "graph so a leaf rule can run the report (--report-only) phase over the transitive set.",
+    fields = {
+        "partial_results": "Directory File of this target's partial results, or None if this " +
+                           "node was not analyzed (e.g. no sources).",
+        "module_name": "The lint module name for this target, or None if not analyzed.",
+        "transitive_results": "depset of structs(module_name, partial_results) for this target " +
+                              "and all analyzed transitive dependencies.",
+    },
+)

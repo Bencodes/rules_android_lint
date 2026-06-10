@@ -55,4 +55,71 @@ class AndroidLintProjectTest {
       """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),
     )
   }
+
+  @Test
+  fun `analyze mode emits a partial-results-dir on the module`() {
+    val partialResults = tmpDirectory.newFolder("partial").toPath()
+    assertThat(
+      createProjectXMLString(
+        moduleName = "test_module_name",
+        rootDir = tmpDirectory.root.absolutePath,
+        srcs = listOf(tmpDirectory.newPath("Foo.kt")),
+        resources = emptyList(),
+        androidManifest = null,
+        classpathJars = emptyList(),
+        classpathAars = emptyList(),
+        classpathExtractedAarDirectories = emptyList(),
+        customLintChecks = emptyList(),
+        partialResultsDir = partialResults,
+      ),
+    ).isEqualTo(
+      """
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <project>
+        <root dir="{root}"/>
+        <module android="false" name="test_module_name" partial-results-dir="{root}/partial">
+          <src file="{root}/Foo.kt"/>
+        </module>
+      </project>
+
+      """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),
+    )
+  }
+
+  @Test
+  fun `report mode links dependency modules carrying their own partial-results-dir`() {
+    val ownPartial = tmpDirectory.newFolder("own").toPath()
+    val depPartial = tmpDirectory.newFolder("depA").toPath()
+    assertThat(
+      createProjectXMLString(
+        moduleName = "test_module_name",
+        rootDir = tmpDirectory.root.absolutePath,
+        srcs = listOf(tmpDirectory.newPath("Foo.kt")),
+        resources = emptyList(),
+        androidManifest = null,
+        classpathJars = emptyList(),
+        classpathAars = emptyList(),
+        classpathExtractedAarDirectories = emptyList(),
+        customLintChecks = emptyList(),
+        partialResultsDir = ownPartial,
+        dependencyModules =
+          listOf(
+            LintDependencyModule(name = "dep_a", partialResultsDir = depPartial),
+          ),
+      ),
+    ).isEqualTo(
+      """
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <project>
+        <root dir="{root}"/>
+        <module android="false" name="test_module_name" partial-results-dir="{root}/own">
+          <src file="{root}/Foo.kt"/>
+          <dep module="dep_a"/>
+        </module>
+        <module library="true" name="dep_a" partial-results-dir="{root}/depA"/>
+      </project>
+
+      """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),
+    )
+  }
 }

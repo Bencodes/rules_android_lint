@@ -18,6 +18,16 @@ internal class AndroidLintActionArgs(
     Pair(Paths.get(aar), Paths.get(aarDir))
   }
 
+  private val argsParserDependencyModuleTransformer: String.() -> Pair<String, Path> = {
+    // Format: <module-name>=<partial-results-dir>. The name is opaque and may itself contain
+    // no '=', so split on the first occurrence only.
+    val separator = this.indexOf('=')
+    require(separator > 0) {
+      "Error: --dependency-partial-results expects <module-name>=<dir>, got: $this"
+    }
+    Pair(this.substring(0, separator), Paths.get(this.substring(separator + 1)))
+  }
+
   val androidLintCliTool: Path by parser.storing(
     names = arrayOf("--android-lint-cli-tool"),
     help = "",
@@ -28,6 +38,32 @@ internal class AndroidLintActionArgs(
     names = arrayOf("--label"),
     help = "",
   )
+
+  // Execution mode. "legacy" runs analysis and reporting in a single invocation (the original
+  // behavior). "analyze" runs `--analyze-only` and writes partial results. "report" runs
+  // `--report-only`, merging the module's own and its dependencies' partial results into a report.
+  val mode: String by parser
+    .storing(
+      names = arrayOf("--mode"),
+      help = "One of: legacy, analyze, report",
+    ).default { "legacy" }
+
+  // In analyze mode, the directory lint writes partial results into. In report mode, the directory
+  // lint reads the module's own partial results from.
+  val partialResults: Path? by parser
+    .storing(
+      names = arrayOf("--partial-results"),
+      help = "",
+      transform = argsParserPathTransformer,
+    ).default { null }
+
+  // First-party dependency partial results consumed in report mode, as <module-name>=<dir> pairs.
+  val dependencyPartialResults: List<Pair<String, Path>> by parser
+    .adding(
+      names = arrayOf("--dependency-partial-results"),
+      help = "",
+      transform = argsParserDependencyModuleTransformer,
+    ).default { emptyList() }
 
   val androidHome: String? by parser
     .storing(
@@ -48,11 +84,13 @@ internal class AndroidLintActionArgs(
     transform = argsParserPathTransformer,
   )
 
-  val output: Path by parser.storing(
-    names = arrayOf("--output"),
-    help = "",
-    transform = argsParserPathTransformer,
-  )
+  // The XML report output. Required in legacy and report modes; absent in analyze mode.
+  val output: Path? by parser
+    .storing(
+      names = arrayOf("--output"),
+      help = "",
+      transform = argsParserPathTransformer,
+    ).default { null }
 
   val resources: List<Path> by parser
     .adding(
