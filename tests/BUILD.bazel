@@ -6,6 +6,8 @@ test_suite(
     name = "tests",
     tests = [
         ":versions_test",
+        "//tests/scripts:android_lint_aar_scenarios_test",
+        "//tests/scripts:android_lint_scenarios_test",
         "//tests/src/cli:tests",
         "//tests/src/worker:tests",
     ],
