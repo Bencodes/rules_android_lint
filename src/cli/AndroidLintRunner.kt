@@ -52,9 +52,13 @@ internal class AndroidLintRunner(
     // Run Android Lint
     val androidCacheFolder = workingDirectory.resolve("android-cache")
     Files.createDirectory(androidCacheFolder)
+    val lintUserHomeFolder = workingDirectory.resolve("lint-user-home")
+    Files.createDirectory(lintUserHomeFolder)
+
     val invoker = invokerCache.acquire(listOf(args.androidLintCliTool))
     val exitCode =
       try {
+        System.setProperty("user.home", lintUserHomeFolder.toString())
         invokeAndroidLintCLI(
           invoker = invoker,
           actionArgs = args,

@@ -59,8 +59,6 @@ class AndroidLintActionTest {
     assertThat(cache.createdCount).isEqualTo(1)
   }
 
-<<<<<<< HEAD
-=======
   @Test
   fun `lint runs with an invocation-scoped user home`() {
     val cache = AndroidLintCliInvokerCache()
@@ -106,7 +104,6 @@ class AndroidLintActionTest {
     assertThat(sdkHome).isEqualTo(rootDir.resolve("external/androidsdk").toString())
   }
 
->>>>>>> 46680f4 (Migrate to hermetic Android toolchains)
   private fun workRequestArgs(
     lintJar: Path,
     label: String,

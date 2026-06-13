@@ -15,7 +15,14 @@ class Main {
 
   fun run(args: Array<String>): Int {
     runBarrier?.await(5, TimeUnit.SECONDS)
-    recordedRuns.add(RunRecord(this, args.toList(), flags.checkDependencies))
+    recordedRuns.add(
+      RunRecord(
+        instance = this,
+        args = args.toList(),
+        checkDependencies = flags.checkDependencies,
+        userHome = System.getProperty("user.home"),
+      ),
+    )
     return exitCode
   }
 
@@ -23,6 +30,7 @@ class Main {
     val instance: Main,
     val args: List<String>,
     val checkDependencies: Boolean,
+    val userHome: String?,
   )
 
   companion object {
