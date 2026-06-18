@@ -138,6 +138,7 @@ def _run_android_lint(
 
     if android_lint_toolchain.android_home != None:
         args.add("--android-home", android_lint_toolchain.android_home.label.workspace_root)
+        inputs.extend(android_lint_toolchain.android_home.files.to_list())
 
     if java_runtime_info:
         args.add("--jdk-home", java_runtime_info.java_home)
