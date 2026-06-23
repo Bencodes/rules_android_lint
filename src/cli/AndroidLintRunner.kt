@@ -128,8 +128,8 @@ internal class AndroidLintRunner(
       args.add(actionArgs.disableChecks.joinToString(","))
     }
 
-    if (actionArgs.androidHome?.isNotEmpty() != null) {
-      var androidHomePath =
+    if (actionArgs.androidHome?.isNotEmpty() == true) {
+      val androidHomePath =
         Paths.get(System.getenv("PWD"), actionArgs.androidHome).absolutePathString()
       args.add("--sdk-home")
       args.add(androidHomePath)

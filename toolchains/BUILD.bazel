@@ -8,6 +8,7 @@ toolchain_type(
 
 android_lint_toolchain(
     name = "android_lint_default",
+    android_home = "@androidsdk//:files",
     visibility = ["//visibility:public"],
 )
 

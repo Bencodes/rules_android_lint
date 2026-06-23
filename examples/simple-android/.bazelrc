@@ -8,3 +8,6 @@ common --java_language_version=17
 common --java_runtime_version=remotejdk_17
 common --tool_java_language_version=17
 common --tool_java_runtime_version=remotejdk_17
+
+# Required by hermetic_android_toolchains for the pinned SDK version.
+common --repo_env=ACCEPTED_ANDROID_SDK_LICENSE_VERSION=34
