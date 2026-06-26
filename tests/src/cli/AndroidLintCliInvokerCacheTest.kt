@@ -30,7 +30,7 @@ class AndroidLintCliInvokerCacheTest {
 
   @Test
   fun `acquiring twice with an unchanged jar reuses the invoker`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val jar = writeJar("lint.jar", entryCount = 1)
 
     val first = cache.acquire(listOf(jar))
@@ -44,7 +44,7 @@ class AndroidLintCliInvokerCacheTest {
 
   @Test
   fun `a changed jar evicts the cached invoker and disposes it`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val jar = writeJar("lint.jar", entryCount = 1)
 
     val first = cache.acquire(listOf(jar))
@@ -62,7 +62,7 @@ class AndroidLintCliInvokerCacheTest {
 
   @Test
   fun `eviction defers disposal until the last lease is released`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val jar = writeJar("lint.jar", entryCount = 1)
 
     val first = cache.acquire(listOf(jar))
@@ -83,7 +83,7 @@ class AndroidLintCliInvokerCacheTest {
 
   @Test
   fun `invoke creates a fresh Main per call and applies checkDependencies per call`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val jar = writeJar("lint.jar", entryCount = 1)
     val invoker = cache.acquire(listOf(jar))
 
@@ -103,7 +103,7 @@ class AndroidLintCliInvokerCacheTest {
 
   @Test
   fun `concurrent invocations share one classloader with independent Main instances`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val jar = writeJar("lint.jar", entryCount = 1)
     // Both runs must be in flight at the same time before either completes.
     Main.runBarrier = CyclicBarrier(2)
