@@ -139,3 +139,14 @@ class AndroidLintActionTest {
     return jar
   }
 }
+
+private fun List<String>.argumentAfter(argument: String): String {
+  val argumentIndex = indexOf(argument)
+  assertThat(argumentIndex)
+    .describedAs("argument index for %s in %s", argument, this)
+    .isGreaterThanOrEqualTo(0)
+  assertThat(argumentIndex + 1)
+    .describedAs("value index for %s in %s", argument, this)
+    .isLessThan(size)
+  return this[argumentIndex + 1]
+}
