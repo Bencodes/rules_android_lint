@@ -18,6 +18,8 @@ class AndroidLintActionArgsTest {
             "test",
             "--android-lint-cli-tool",
             "path/to/cli.jar",
+            "--android-home",
+            "external/androidsdk",
             "--src",
             "path/to/Foo.kt",
             "--output",
@@ -54,6 +56,7 @@ class AndroidLintActionArgsTest {
       )
 
     assertThat(parseArgs.label).isEqualTo("test")
+    assertThat(parseArgs.androidHome).isEqualTo("external/androidsdk")
     assertThat(parseArgs.srcs).containsExactly(Paths.get("path/to/Foo.kt"))
     assertThat(parseArgs.output).isEqualTo(Paths.get("output.jar"))
     assertThat(parseArgs.resources).containsExactly(Paths.get("path/to/resource/strings.xml"))

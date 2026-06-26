@@ -27,6 +27,13 @@ common --java_runtime_version=remotejdk_17
 common --tool_java_runtime_version=remotejdk_17
 ```
 
+The default lint toolchain uses `hermetic_android_toolchains` to provide the Android SDK
+through Bazel. Accept the pinned SDK license in your `.bazelrc`:
+
+```
+common --repo_env=ACCEPTED_ANDROID_SDK_LICENSE_VERSION=34
+```
+
 ### Using a different Android Lint version
 
 The lint binary is supplied by the toolchain. To pin your own version, build a deploy jar

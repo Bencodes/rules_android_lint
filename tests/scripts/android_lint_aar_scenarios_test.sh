@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Scenarios for custom lint checks embedded in AAR dependencies (lint.jar), exercising the
-# collect_aar_outputs_aspect extraction and auto-discovery path. Requires ANDROID_HOME.
+# collect_aar_outputs_aspect extraction and auto-discovery path.
 
 # --- begin runfiles.bash initialization v2 ---
 # Copy-pasted from the Bazel Bash runfiles library v2.

@@ -42,7 +42,7 @@ _ATTRS = dict(
     ),
     android_home = attr.label(
         mandatory = False,
-        doc = "The target that represents where the ANDROID_HOME is located.",
+        doc = "A target in the Android SDK repository. Its repository root is passed to lint as the SDK home.",
     ),
 )
 

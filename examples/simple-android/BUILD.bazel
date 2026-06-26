@@ -30,6 +30,7 @@ android_lint_test(
 
 android_lint_toolchain(
     name = "android_lint_default",
+    android_home = "@androidsdk//:files",
     android_lint_config = "lint_global.xml",
     visibility = ["//visibility:public"],
 )

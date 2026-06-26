@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 
@@ -58,9 +59,55 @@ class AndroidLintActionTest {
     assertThat(cache.createdCount).isEqualTo(1)
   }
 
+  @Test
+  fun `lint runs with an invocation-scoped user home`() {
+    val cache = AndroidLintCliInvokerCache()
+    val executor = AndroidLintAction.AndroidLintExecutor(cache)
+    val jar = writeStubLintJar()
+
+    val exitCode = executor.processWorkRequest(workRequestArgs(jar, "user-home"), System.err)
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(Main.recordedRuns).hasSize(1)
+    assertThat(Main.recordedRuns.single().userHome)
+      .contains("lint-user-home")
+  }
+
+  @Test
+  fun `lint receives sdk home from android home`() {
+    val cache = AndroidLintCliInvokerCache()
+    val executor = AndroidLintAction.AndroidLintExecutor(cache)
+    val jar = writeStubLintJar()
+
+    val exitCode =
+      executor.processWorkRequest(
+        workRequestArgs(
+          lintJar = jar,
+          label = "android-home",
+          extraArgs =
+            listOf(
+              "--android-home",
+              "external/androidsdk",
+            ),
+        ),
+        System.err,
+      )
+
+    val rootDir = Paths.get(System.getenv("PWD")).toAbsolutePath().normalize()
+    val sdkHome =
+      Main.recordedRuns
+        .single()
+        .args
+        .argumentAfter("--sdk-home")
+
+    assertThat(exitCode).isEqualTo(0)
+    assertThat(sdkHome).isEqualTo(rootDir.resolve("external/androidsdk").toString())
+  }
+
   private fun workRequestArgs(
     lintJar: Path,
     label: String,
+    extraArgs: List<String> = emptyList(),
   ): List<String> {
     val output = temporaryFolder.root.toPath().resolve("$label-output.xml")
     return listOf(
@@ -76,7 +123,7 @@ class AndroidLintActionTest {
       "17",
       "--kotlin-language-level",
       "1.9",
-    )
+    ) + extraArgs
   }
 
   private fun writeStubLintJar(): Path {
@@ -88,4 +135,15 @@ class AndroidLintActionTest {
     }
     return jar
   }
+}
+
+private fun List<String>.argumentAfter(argument: String): String {
+  val argumentIndex = indexOf(argument)
+  assertThat(argumentIndex)
+    .describedAs("argument index for %s in %s", argument, this)
+    .isGreaterThanOrEqualTo(0)
+  assertThat(argumentIndex + 1)
+    .describedAs("value index for %s in %s", argument, this)
+    .isLessThan(size)
+  return this[argumentIndex + 1]
 }
