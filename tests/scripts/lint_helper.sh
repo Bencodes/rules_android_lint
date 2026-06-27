@@ -39,6 +39,7 @@ bazel_dep(name = "platforms", version = "1.0.0")
 android = use_extension(
     "@hermetic_android_toolchains//:extensions.bzl",
     "android",
+    dev_dependency = True,
 )
 android.sdk(
     build_tools_version = "35.0.0",
@@ -110,7 +111,7 @@ EOF
   # The consumer workspace, in the CWD.
   cat > MODULE.bazel <<EOF
 bazel_dep(name = "rules_android_lint")
-bazel_dep(name = "hermetic_android_toolchains", version = "0.1.1")
+bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0")
 bazel_dep(name = "rules_android", version = "0.7.3")
 
 local_path_override(
@@ -118,22 +119,26 @@ local_path_override(
     path = "${dest}",
 )
 
-android = use_extension("@hermetic_android_toolchains//:extensions.bzl", "android")
+android = use_extension(
+    "@hermetic_android_toolchains//:extensions.bzl",
+    "android",
+    dev_dependency = True,
+)
 android.sdk(
     build_tools_version = "35.0.0",
     version = "34",
 )
-android.ndk(version = "r25c")
 use_repo(android, "androidsdk")
 
 rules_android_sdk = use_extension(
     "@rules_android//rules/android_sdk_repository:rule.bzl",
     "android_sdk_repository_extension",
+    dev_dependency = True,
 )
 override_repo(rules_android_sdk, "androidsdk")
 
-register_toolchains("@androidsdk//:all")
-register_toolchains("//toolchains:default_toolchain")
+register_toolchains("@androidsdk//:all", dev_dependency = True)
+register_toolchains("//toolchains:default_toolchain", dev_dependency = True)
 EOF
 
   mkdir -p toolchains
