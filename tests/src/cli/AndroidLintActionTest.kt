@@ -26,7 +26,7 @@ class AndroidLintActionTest {
 
   @Test
   fun `sequential work requests reuse a single cached lint classloader`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val executor = AndroidLintAction.AndroidLintExecutor(cache)
     val jar = writeStubLintJar()
 
@@ -43,7 +43,7 @@ class AndroidLintActionTest {
   fun `lint issue exit codes do not fail the work request or evict the cache`() {
     // By design the action always succeeds and produces a report; enforcement happens in the
     // android_lint_test validator. A lint exit code must not kill or degrade the worker.
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val executor = AndroidLintAction.AndroidLintExecutor(cache)
     val jar = writeStubLintJar()
 
@@ -61,7 +61,7 @@ class AndroidLintActionTest {
 
   @Test
   fun `lint runs with an invocation-scoped user home`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val executor = AndroidLintAction.AndroidLintExecutor(cache)
     val jar = writeStubLintJar()
 
@@ -75,7 +75,7 @@ class AndroidLintActionTest {
 
   @Test
   fun `lint receives sdk home from android home`() {
-    val cache = AndroidLintCliInvokerCache()
+    val cache = AndroidLintCliInvokerCache(parentClassloader = javaClass.classLoader)
     val executor = AndroidLintAction.AndroidLintExecutor(cache)
     val jar = writeStubLintJar()
 

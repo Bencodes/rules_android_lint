@@ -85,7 +85,12 @@ class AndroidLintCliInvoker(
     const val ERRNO_INTERNAL_CONTINUE = 100
 
     fun createUsingJars(
-      parentClassloader: ClassLoader = this::class.java.classLoader,
+      // Parent on the platform classloader (JDK classes only) so lint loads its entire runtime —
+      // crucially kotlin-stdlib AND kotlin-reflect — from its own deploy jar. Parenting on the
+      // worker's classloader instead lets the worker's kotlin-stdlib shadow lint's, and since the
+      // worker has no kotlin-reflect, Kotlin reflection inside lint detectors (e.g. the partial
+      // analysis "fx" checks) silently fails. This mirrors AGP's AndroidLintWorkAction.
+      parentClassloader: ClassLoader = ClassLoader.getPlatformClassLoader(),
       vararg jars: Path,
     ): AndroidLintCliInvoker {
       require(jars.isNotEmpty()) {

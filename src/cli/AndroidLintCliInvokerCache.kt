@@ -15,7 +15,12 @@ import java.nio.file.Path
  * while a request against the old jar is still running, so the old classloader is only disposed
  * once its last lease is released.
  */
-internal class AndroidLintCliInvokerCache {
+internal class AndroidLintCliInvokerCache(
+  // The classloader lint's deploy jar is parented on. Defaults to the platform classloader so lint
+  // is fully isolated from the worker's classpath. Tests override this to resolve stub lint classes
+  // from the test classpath.
+  private val parentClassloader: ClassLoader = ClassLoader.getPlatformClassLoader(),
+) {
   private class Entry(
     val key: String,
     val invoker: AndroidLintCliInvoker,
@@ -44,7 +49,11 @@ internal class AndroidLintCliInvokerCache {
       }
       current = null
     }
-    val invoker = AndroidLintCliInvoker.createUsingJars(jars = jars.toTypedArray())
+    val invoker =
+      AndroidLintCliInvoker.createUsingJars(
+        parentClassloader = parentClassloader,
+        jars = jars.toTypedArray(),
+      )
     createdCount += 1
     current = Entry(key = key, invoker = invoker, activeLeases = 1)
     return invoker
