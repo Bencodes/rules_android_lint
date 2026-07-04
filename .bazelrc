@@ -1,5 +1,8 @@
 common --experimental_google_legacy_api
 
+# Use pre-built protobuf compiler/tooling from protobuf module.
+common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+
 # Lint 32.x ships Java 17 bytecode; the lint worker must run on a 17+ JVM.
 # JDK 17 is the standard across the Android rules.
 common --java_language_version=17
