@@ -29,7 +29,7 @@ function set_up_lint_workspace() {
   cat > "${dest}/MODULE.bazel" <<EOF
 module(name = "rules_android_lint")
 
-bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0")
+bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0", dev_dependency = True)
 bazel_dep(name = "rules_android", version = "0.7.3")
 bazel_dep(name = "rules_java", version = "9.3.0")
 bazel_dep(name = "rules_python", version = "1.7.0")
@@ -111,7 +111,7 @@ EOF
   # The consumer workspace, in the CWD.
   cat > MODULE.bazel <<EOF
 bazel_dep(name = "rules_android_lint")
-bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0")
+bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0", dev_dependency = True)
 bazel_dep(name = "rules_android", version = "0.7.3")
 
 local_path_override(
