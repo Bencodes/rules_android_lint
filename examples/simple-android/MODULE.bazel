@@ -11,7 +11,7 @@ local_path_override(
     path = "../../",
 )
 
-bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0", dev_dependency = True)
+bazel_dep(name = "hermetic_android_toolchains", version = "0.3.0", dev_dependency = True)
 
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_android", version = "0.7.3")
