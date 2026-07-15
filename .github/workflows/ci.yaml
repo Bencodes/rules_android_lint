@@ -27,15 +27,12 @@ jobs:
     steps:
       - name: "Checkout the sources"
         uses: actions/checkout@v7
-      - name: Mount bazel caches
-        uses: actions/cache@v6
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
         with:
-          path: |
-            ~/.cache/bazel
-          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
-          restore-keys: bazel-cache-
-      - name: "Setup Bazelisk"
-        uses: bazelbuild/setup-bazelisk@v3
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}-${{ matrix.bazel_version }}
+          repository-cache: true
       - name: "Running tests //..."
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
@@ -51,15 +48,12 @@ jobs:
     steps:
       - name: "Checkout the sources"
         uses: actions/checkout@v7
-      - name: Mount bazel caches
-        uses: actions/cache@v6
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
         with:
-          path: |
-            ~/.cache/bazel
-          key: bazel-cache-${{ hashFiles('**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel') }}
-          restore-keys: bazel-cache-
-      - name: "Setup Bazelisk"
-        uses: bazelbuild/setup-bazelisk@v3
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}-${{ matrix.bazel_version }}
+          repository-cache: true
       - name: "Running integration tests ${{ matrix.directory }}"
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
