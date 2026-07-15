@@ -1,5 +1,5 @@
 module(
-    name = "examples_simple",
+    name = "e2e_simple_android",
     version = "TODO",
 )
 

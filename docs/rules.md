@@ -87,5 +87,3 @@ Info needed to evaluate lint results
 | Name  | Description |
 | :------------- | :------------- |
 | <a id="AndroidLintResultsInfo-output"></a>output |  The Android Lint baseline output    |
-
-

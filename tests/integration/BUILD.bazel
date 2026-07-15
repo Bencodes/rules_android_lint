@@ -1,0 +1,167 @@
+load("@rules_android//rules:rules.bzl", "aar_import")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("//rules:defs.bzl", "android_lint", "android_lint_test")
+load(":fixture_aar.bzl", "lint_aar_fixture")
+load(":lint_report_test.bzl", "lint_report_test")
+
+py_binary(
+    name = "fixture_aar_builder",
+    srcs = ["fixture_aar_builder.py"],
+)
+
+filegroup(
+    name = "basic_clean_lib",
+    srcs = ["fixtures/basic/Clean.java"],
+)
+
+android_lint_test(
+    name = "basic_clean_test",
+    srcs = ["fixtures/basic/Clean.java"],
+    lib = ":basic_clean_lib",
+    warnings_as_errors = True,
+)
+
+filegroup(
+    name = "basic_dirty_lib",
+    srcs = ["fixtures/basic/Dirty.java"],
+)
+
+android_lint(
+    name = "basic_dirty_lint",
+    srcs = ["fixtures/basic/Dirty.java"],
+    lib = ":basic_dirty_lib",
+    warnings_as_errors = True,
+)
+
+lint_report_test(
+    name = "basic_dirty_report_test",
+    expected_issues = ["DefaultLocale"],
+    lint = ":basic_dirty_lint",
+)
+
+android_lint_test(
+    name = "basic_disabled_check_test",
+    srcs = ["fixtures/basic/Dirty.java"],
+    disable_checks = ["DefaultLocale"],
+    lib = ":basic_dirty_lib",
+    warnings_as_errors = True,
+)
+
+android_lint_test(
+    name = "basic_baseline_test",
+    srcs = ["fixtures/basic/Dirty.java"],
+    baseline = "fixtures/basic/DirtyBaseline.xml",
+    lib = ":basic_dirty_lib",
+    warnings_as_errors = True,
+)
+
+filegroup(
+    name = "compose_clean_lib",
+    srcs = [
+        "fixtures/compose/androidx/compose/runtime/Composable.kt",
+        "fixtures/compose/androidx/compose/ui/Modifier.kt",
+        "fixtures/compose/com/example/CleanComposables.kt",
+        "fixtures/compose/com/example/Stubs.kt",
+    ],
+)
+
+filegroup(
+    name = "compose_dirty_lib",
+    srcs = [
+        "fixtures/compose/androidx/compose/runtime/Composable.kt",
+        "fixtures/compose/androidx/compose/ui/Modifier.kt",
+        "fixtures/compose/com/example/DirtyComposables.kt",
+        "fixtures/compose/com/example/Stubs.kt",
+    ],
+)
+
+android_lint_test(
+    name = "custom_rules_clean_test",
+    srcs = [
+        "fixtures/compose/androidx/compose/runtime/Composable.kt",
+        "fixtures/compose/androidx/compose/ui/Modifier.kt",
+        "fixtures/compose/com/example/CleanComposables.kt",
+        "fixtures/compose/com/example/Stubs.kt",
+    ],
+    custom_rules = ["@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks"],
+    lib = ":compose_clean_lib",
+    warnings_as_errors = True,
+)
+
+android_lint(
+    name = "custom_rules_dirty_lint",
+    srcs = [
+        "fixtures/compose/androidx/compose/runtime/Composable.kt",
+        "fixtures/compose/androidx/compose/ui/Modifier.kt",
+        "fixtures/compose/com/example/DirtyComposables.kt",
+        "fixtures/compose/com/example/Stubs.kt",
+    ],
+    custom_rules = ["@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks"],
+    lib = ":compose_dirty_lib",
+    warnings_as_errors = True,
+)
+
+lint_report_test(
+    name = "custom_rules_dirty_report_test",
+    expected_issues = ["ComposeNamingUppercase"],
+    lint = ":custom_rules_dirty_lint",
+)
+
+lint_aar_fixture(
+    name = "compose_lint_fixture",
+    lint_jar = "@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks",
+    manifest = "fixtures/aar/AndroidManifest.xml",
+    visibility = ["//tests:__subpackages__"],
+)
+
+aar_import(
+    name = "compose_lint_aar",
+    aar = ":compose_lint_fixture",
+    visibility = ["//tests:__subpackages__"],
+)
+
+android_lint_test(
+    name = "aar_rules_clean_test",
+    srcs = [
+        "fixtures/compose/androidx/compose/runtime/Composable.kt",
+        "fixtures/compose/androidx/compose/ui/Modifier.kt",
+        "fixtures/compose/com/example/CleanComposables.kt",
+        "fixtures/compose/com/example/Stubs.kt",
+    ],
+    lib = ":compose_clean_lib",
+    warnings_as_errors = True,
+    deps = [":compose_lint_aar"],
+)
+
+android_lint(
+    name = "aar_rules_dirty_lint",
+    srcs = [
+        "fixtures/compose/androidx/compose/runtime/Composable.kt",
+        "fixtures/compose/androidx/compose/ui/Modifier.kt",
+        "fixtures/compose/com/example/DirtyComposables.kt",
+        "fixtures/compose/com/example/Stubs.kt",
+    ],
+    lib = ":compose_dirty_lib",
+    warnings_as_errors = True,
+    deps = [":compose_lint_aar"],
+)
+
+lint_report_test(
+    name = "aar_rules_dirty_report_test",
+    expected_issues = ["ComposeNamingUppercase"],
+    lint = ":aar_rules_dirty_lint",
+)
+
+test_suite(
+    name = "tests",
+    tests = [
+        ":aar_rules_clean_test",
+        ":aar_rules_dirty_report_test",
+        ":basic_baseline_test",
+        ":basic_clean_test",
+        ":basic_dirty_report_test",
+        ":basic_disabled_check_test",
+        ":custom_rules_clean_test",
+        ":custom_rules_dirty_report_test",
+    ],
+)

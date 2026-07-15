@@ -1,0 +1,19 @@
+load("//rules:defs.bzl", "android_lint")
+load(":android_lint_analysis_test.bzl", "android_lint_analysis_test_suite")
+
+filegroup(
+    name = "fixture_lib",
+    srcs = ["Fixture.java"],
+)
+
+android_lint(
+    name = "analysis_fixture_lint",
+    srcs = ["Fixture.java"],
+    custom_rules = ["@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks"],
+    disable_checks = ["DefaultLocale"],
+    lib = ":fixture_lib",
+    tags = ["manual"],
+    warnings_as_errors = True,
+)
+
+android_lint_analysis_test_suite(name = "tests")

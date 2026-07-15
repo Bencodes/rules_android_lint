@@ -19,6 +19,7 @@ concurrency:
 jobs:
   tests:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         bazel_version: ["8.x", "9.x"]
@@ -41,9 +42,10 @@ jobs:
         run: bazel test //...
   integration-tests:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        directory: [examples/simple-android]
+        directory: [e2e/simple-android]
         strategy: [local, worker]
         bazel_version: ["8.x", "9.x"]
     runs-on: ${{ matrix.os }}

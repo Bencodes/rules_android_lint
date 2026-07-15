@@ -62,10 +62,29 @@ kt_jvm_test(
     ],
 )
 
+kt_jvm_test(
+    name = "AndroidLintRunnerTest",
+    srcs = ["AndroidLintRunnerTest.kt"],
+    associates = ["//src/cli:lint"],
+    test_class = "com.rules.android.lint.cli.AndroidLintRunnerTest",
+    deps = [
+        "//tests/src/cli/stubs",
+        "@rules_android_lint_test_deps//:junit_junit",
+        "@rules_android_lint_test_deps//:org_assertj_assertj_core",
+    ],
+)
+
 android_lint_test(
     name = "AndroidLintProjectTest_lint_test",
     srcs = ["AndroidLintProjectTest.kt"],
     lib = ":AndroidLintProjectTest",
+    visibility = ["//visibility:private"],
+)
+
+android_lint_test(
+    name = "AndroidLintRunnerTest_lint_test",
+    srcs = ["AndroidLintRunnerTest.kt"],
+    lib = ":AndroidLintRunnerTest",
     visibility = ["//visibility:private"],
 )
 
@@ -90,5 +109,6 @@ test_suite(
         ":AndroidLintActionTest",
         ":AndroidLintCliInvokerCacheTest",
         ":AndroidLintProjectTest",
+        ":AndroidLintRunnerTest",
     ],
 )

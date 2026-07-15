@@ -22,16 +22,6 @@ bazel_dep(name = "protobuf", version = "33.4", repo_name = "com_google_protobuf"
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.2", dev_dependency = True)
-bazel_dep(name = "rules_bazel_integration_test", version = "0.37.1", dev_dependency = True)
-bazel_dep(name = "rules_shell", version = "0.6.1", dev_dependency = True)
-
-bazel_binaries = use_extension(
-    "@rules_bazel_integration_test//:extensions.bzl",
-    "bazel_binaries",
-    dev_dependency = True,
-)
-bazel_binaries.download(version_file = "//:.bazelversion")
-use_repo(bazel_binaries, "bazel_binaries", "bazel_binaries_bazelisk", "build_bazel_bazel_.bazelversion")
 
 android = use_extension(
     "@hermetic_android_toolchains//:extensions.bzl",
@@ -94,7 +84,7 @@ maven_test.install(
     artifacts = [
         "org.assertj:assertj-core:3.24.2",
         "junit:junit:4.13.2",
-        # Custom lint check used as a test fixture by //tests/scripts
+        # Custom lint check used by the top-level integration fixtures.
         "com.slack.lint.compose:compose-lint-checks:1.5.2",
     ],
     lock_file = "//:maven_install_test.json",

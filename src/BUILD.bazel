@@ -1,4 +1,10 @@
-load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+
+py_library(
+    name = "android_lint_output_validator_lib",
+    srcs = ["android_lint_output_validator.py"],
+    visibility = ["//tests:__subpackages__"],
+)
 
 py_binary(
     name = "android_lint_output_validator",

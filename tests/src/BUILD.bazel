@@ -1,0 +1,12 @@
+load("@rules_python//python:defs.bzl", "py_test")
+
+py_test(
+    name = "android_lint_output_validator_test",
+    srcs = ["android_lint_output_validator_test.py"],
+    deps = ["//src:android_lint_output_validator_lib"],
+)
+
+test_suite(
+    name = "tests",
+    tests = [":android_lint_output_validator_test"],
+)
