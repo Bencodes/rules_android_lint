@@ -3,12 +3,25 @@ load(":versions_test.bzl", "versions_test_suite")
 versions_test_suite(name = "versions_test")
 
 test_suite(
-    name = "tests",
+    name = "unit_tests",
     tests = [
         ":versions_test",
-        "//tests/scripts:android_lint_aar_scenarios_test",
-        "//tests/scripts:android_lint_scenarios_test",
+        "//tests/rules:tests",
+        "//tests/src:tests",
         "//tests/src/cli:tests",
         "//tests/src/worker:tests",
+    ],
+)
+
+test_suite(
+    name = "rule_tests",
+    tests = ["//tests/integration:tests"],
+)
+
+test_suite(
+    name = "tests",
+    tests = [
+        ":rule_tests",
+        ":unit_tests",
     ],
 )
