@@ -21,6 +21,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        strategy: [local, worker]
         bazel_version: ["8.x", "9.x"]
     runs-on: ${{ matrix.os }}
     steps:
@@ -38,7 +39,7 @@ jobs:
       - name: "Running tests //..."
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
-        run: bazel test //...
+        run: bazel test //... --strategy=AndroidLint=${{ matrix.strategy }}
   integration-tests:
     strategy:
       matrix:
