@@ -524,8 +524,12 @@
       "net.java.dev.jna:jna-platform",
       "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     ],
-    "com.android.tools:dvlib": ["com.android.tools:common"],
-    "com.android.tools:play-sdk-proto": ["com.google.protobuf:protobuf-java"],
+    "com.android.tools:dvlib": [
+      "com.android.tools:common"
+    ],
+    "com.android.tools:play-sdk-proto": [
+      "com.google.protobuf:protobuf-java"
+    ],
     "com.android.tools:repository": [
       "com.android.tools.analytics-library:shared",
       "com.android.tools:common",
@@ -576,7 +580,9 @@
       "com.google.j2objc:j2objc-annotations",
       "org.checkerframework:checker-qual"
     ],
-    "com.google.jimfs:jimfs": ["com.google.guava:guava"],
+    "com.google.jimfs:jimfs": [
+      "com.google.guava:guava"
+    ],
     "com.sun.istack:istack-commons-runtime": [
       "jakarta.activation:jakarta.activation-api"
     ],
@@ -584,11 +590,15 @@
       "com.xenomachina:xenocom",
       "org.jetbrains.kotlin:kotlin-stdlib"
     ],
-    "com.xenomachina:xenocom": ["org.jetbrains.kotlin:kotlin-stdlib"],
+    "com.xenomachina:xenocom": [
+      "org.jetbrains.kotlin:kotlin-stdlib"
+    ],
     "jakarta.xml.bind:jakarta.xml.bind-api": [
       "jakarta.activation:jakarta.activation-api"
     ],
-    "net.java.dev.jna:jna-platform": ["net.java.dev.jna:jna"],
+    "net.java.dev.jna:jna-platform": [
+      "net.java.dev.jna:jna"
+    ],
     "org.apache.commons:commons-compress": [
       "commons-codec:commons-codec",
       "commons-io:commons-io",
@@ -606,7 +616,9 @@
       "org.bouncycastle:bcprov-jdk18on",
       "org.bouncycastle:bcutil-jdk18on"
     ],
-    "org.bouncycastle:bcutil-jdk18on": ["org.bouncycastle:bcprov-jdk18on"],
+    "org.bouncycastle:bcutil-jdk18on": [
+      "org.bouncycastle:bcprov-jdk18on"
+    ],
     "org.glassfish.jaxb:jaxb-runtime": [
       "com.sun.istack:istack-commons-runtime",
       "com.sun.xml.fastinfoset:FastInfoset",
@@ -618,7 +630,9 @@
     "org.jetbrains.kotlin:kotlin-reflect": [
       "org.jetbrains.kotlin:kotlin-stdlib"
     ],
-    "org.jetbrains.kotlin:kotlin-stdlib": ["org.jetbrains:annotations"],
+    "org.jetbrains.kotlin:kotlin-stdlib": [
+      "org.jetbrains:annotations"
+    ],
     "org.jetbrains.kotlin:kotlin-stdlib-jdk7": [
       "org.jetbrains.kotlin:kotlin-stdlib"
     ],
@@ -637,9 +651,16 @@
       "jakarta.activation:jakarta.activation-api",
       "jakarta.xml.bind:jakarta.xml.bind-api"
     ],
-    "org.ow2.asm:asm-analysis": ["org.ow2.asm:asm-tree"],
-    "org.ow2.asm:asm-commons": ["org.ow2.asm:asm", "org.ow2.asm:asm-tree"],
-    "org.ow2.asm:asm-tree": ["org.ow2.asm:asm"]
+    "org.ow2.asm:asm-analysis": [
+      "org.ow2.asm:asm-tree"
+    ],
+    "org.ow2.asm:asm-commons": [
+      "org.ow2.asm:asm",
+      "org.ow2.asm:asm-tree"
+    ],
+    "org.ow2.asm:asm-tree": [
+      "org.ow2.asm:asm"
+    ]
   },
   "packages": {
     "com.android.tools.analytics-library:protos": [
@@ -667,7 +688,9 @@
       "com.android.builder.model.v2.models",
       "com.android.builder.model.v2.models.ndk"
     ],
-    "com.android.tools.build:manifest-merger": ["com.android.manifmerger"],
+    "com.android.tools.build:manifest-merger": [
+      "com.android.manifmerger"
+    ],
     "com.android.tools.ddms:ddmlib": [
       "com.android.commands.am",
       "com.android.ddmlib",
@@ -2227,7 +2250,9 @@
       "com.android.tools.lint.checks.optional",
       "com.android.tools.lint.checks.plurals"
     ],
-    "com.android.tools.lint:lint-model": ["com.android.tools.lint.model"],
+    "com.android.tools.lint:lint-model": [
+      "com.android.tools.lint.model"
+    ],
     "com.android.tools:annotations": [
       "com.android.annotations",
       "com.android.annotations.concurrency"
@@ -2258,8 +2283,12 @@
       "com.android.xml",
       "com.android.xml.sax"
     ],
-    "com.android.tools:dvlib": ["com.android.dvlib"],
-    "com.android.tools:play-sdk-proto": ["com.android.tools.lint.checks"],
+    "com.android.tools:dvlib": [
+      "com.android.dvlib"
+    ],
+    "com.android.tools:play-sdk-proto": [
+      "com.android.tools.lint.checks"
+    ],
     "com.android.tools:repository": [
       "com.android.repository",
       "com.android.repository.api",
@@ -2402,8 +2431,12 @@
       "com.google.common.xml",
       "com.google.thirdparty.publicsuffix"
     ],
-    "com.google.j2objc:j2objc-annotations": ["com.google.j2objc.annotations"],
-    "com.google.jimfs:jimfs": ["com.google.common.jimfs"],
+    "com.google.j2objc:j2objc-annotations": [
+      "com.google.j2objc.annotations"
+    ],
+    "com.google.jimfs:jimfs": [
+      "com.google.common.jimfs"
+    ],
     "com.google.protobuf:protobuf-java": [
       "com.google.protobuf",
       "com.google.protobuf.compiler"
@@ -2432,7 +2465,9 @@
       "org.jvnet.fastinfoset.sax.helpers",
       "org.jvnet.fastinfoset.stax"
     ],
-    "com.xenomachina:kotlin-argparser": ["com.xenomachina.argparser"],
+    "com.xenomachina:kotlin-argparser": [
+      "com.xenomachina.argparser"
+    ],
     "com.xenomachina:xenocom": [
       "com.xenomachina.common",
       "com.xenomachina.text",
@@ -2468,7 +2503,9 @@
       "org.apache.commons.logging",
       "org.apache.commons.logging.impl"
     ],
-    "jakarta.activation:jakarta.activation-api": ["javax.activation"],
+    "jakarta.activation:jakarta.activation-api": [
+      "javax.activation"
+    ],
     "jakarta.xml.bind:jakarta.xml.bind-api": [
       "javax.xml.bind",
       "javax.xml.bind.annotation",
@@ -2477,7 +2514,9 @@
       "javax.xml.bind.helpers",
       "javax.xml.bind.util"
     ],
-    "javax.inject:javax.inject": ["javax.inject"],
+    "javax.inject:javax.inject": [
+      "javax.inject"
+    ],
     "net.java.dev.jna:jna": [
       "com.sun.jna",
       "com.sun.jna.internal",
@@ -3112,11 +3151,23 @@
       "org.intellij.lang.annotations",
       "org.jetbrains.annotations"
     ],
-    "org.jvnet.staxex:stax-ex": ["org.jvnet.staxex", "org.jvnet.staxex.util"],
-    "org.ow2.asm:asm": ["org.objectweb.asm", "org.objectweb.asm.signature"],
-    "org.ow2.asm:asm-analysis": ["org.objectweb.asm.tree.analysis"],
-    "org.ow2.asm:asm-commons": ["org.objectweb.asm.commons"],
-    "org.ow2.asm:asm-tree": ["org.objectweb.asm.tree"]
+    "org.jvnet.staxex:stax-ex": [
+      "org.jvnet.staxex",
+      "org.jvnet.staxex.util"
+    ],
+    "org.ow2.asm:asm": [
+      "org.objectweb.asm",
+      "org.objectweb.asm.signature"
+    ],
+    "org.ow2.asm:asm-analysis": [
+      "org.objectweb.asm.tree.analysis"
+    ],
+    "org.ow2.asm:asm-commons": [
+      "org.objectweb.asm.commons"
+    ],
+    "org.ow2.asm:asm-tree": [
+      "org.objectweb.asm.tree"
+    ]
   },
   "repositories": {
     "https://maven.google.com/": [
@@ -3367,7 +3418,9 @@
       ]
     },
     "org.glassfish.jaxb:jaxb-runtime": {
-      "javax.xml.bind.JAXBContext": ["com.sun.xml.bind.v2.ContextFactory"]
+      "javax.xml.bind.JAXBContext": [
+        "com.sun.xml.bind.v2.ContextFactory"
+      ]
     },
     "org.jetbrains.kotlin:kotlin-reflect": {
       "kotlin.reflect.jvm.internal.impl.builtins.BuiltInsLoader": [

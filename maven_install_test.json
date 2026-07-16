@@ -44,8 +44,12 @@
     "com.slack.lint.compose:compose-lint-checks": [
       "com.google.auto.service:auto-service-annotations"
     ],
-    "junit:junit": ["org.hamcrest:hamcrest-core"],
-    "org.assertj:assertj-core": ["net.bytebuddy:byte-buddy"]
+    "junit:junit": [
+      "org.hamcrest:hamcrest-core"
+    ],
+    "org.assertj:assertj-core": [
+      "net.bytebuddy:byte-buddy"
+    ]
   },
   "packages": {
     "com.google.auto.service:auto-service-annotations": [
