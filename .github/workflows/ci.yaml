@@ -19,7 +19,6 @@ concurrency:
 jobs:
   tests:
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         bazel_version: ["8.x", "9.x"]
@@ -42,7 +41,6 @@ jobs:
         run: bazel test //...
   integration-tests:
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         directory: [e2e/simple-android]
