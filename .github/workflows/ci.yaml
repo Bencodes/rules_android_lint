@@ -44,7 +44,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         directory: [e2e/simple-android]
-        strategy: [local, worker]
+        strategy: [worker]
         bazel_version: ["8.x", "9.x"]
     runs-on: ${{ matrix.os }}
     steps:
