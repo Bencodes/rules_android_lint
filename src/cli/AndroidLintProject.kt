@@ -90,6 +90,7 @@ internal fun createProjectXMLString(
   androidManifest: Path?,
   isAndroid: Boolean = androidManifest != null,
   isLibrary: Boolean = false,
+  isTestSources: Boolean = false,
   classpathJars: List<Path>,
   classpathAars: List<Path>,
   classpathExtractedAarDirectories: List<Pair<Path, Path>>,
@@ -136,6 +137,7 @@ internal fun createProjectXMLString(
     document = document,
     moduleElement = moduleElement,
     srcs = srcs,
+    isTestSources = isTestSources,
     resources = resources,
     androidManifest = androidManifest,
     classpathJars = classpathJars,
@@ -166,6 +168,7 @@ internal fun createProjectXMLString(
       document = document,
       moduleElement = dependencyElement,
       srcs = dependency.srcs,
+      isTestSources = false,
       resources = dependency.resources,
       androidManifest = dependency.androidManifest,
       classpathJars = dependency.classpathJars,
@@ -189,6 +192,7 @@ private fun appendModuleContents(
   document: org.w3c.dom.Document,
   moduleElement: org.w3c.dom.Element,
   srcs: List<Path>,
+  isTestSources: Boolean,
   resources: List<Path>,
   androidManifest: Path?,
   classpathJars: List<Path>,
@@ -199,6 +203,9 @@ private fun appendModuleContents(
   srcs.forEach { src ->
     document.createElement("src").also {
       it.setAttribute("file", src.pathString)
+      if (isTestSources) {
+        it.setAttribute("test", "true")
+      }
       moduleElement.appendChild(it)
     }
   }

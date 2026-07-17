@@ -245,6 +245,7 @@ internal class AndroidLintRunner(
         androidManifest = args.androidManifest,
         isAndroid = args.isAndroid || args.androidManifest != null,
         isLibrary = args.isLibrary,
+        isTestSources = args.isTestSources,
         classpathJars = args.classpath.sortedDescending(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = args.classpathAarPairs,

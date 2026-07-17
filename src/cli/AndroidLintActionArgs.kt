@@ -50,6 +50,12 @@ internal class AndroidLintActionArgs(
       help = "Model this project as a library module.",
     ).default { false }
 
+  val isTestSources: Boolean by parser
+    .flagging(
+      names = arrayOf("--test-sources"),
+      help = "Model this project's sources as test sources.",
+    ).default { false }
+
   // In analyze mode, the directory lint writes partial results into. In report mode, the directory
   // lint reads the module's own partial results from.
   val partialResults: Path? by parser

@@ -1,6 +1,7 @@
 """Analysis tests for android_lint action and provider wiring."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
+load("@rules_android//providers:providers.bzl", "ApkInfo")
 load("//rules:lint_analysis_aspect.bzl", "lint_analysis_aspect")
 load(
     "//rules:providers.bzl",
@@ -22,6 +23,13 @@ def _argument_values(argv, flag):
         for index in range(len(argv) - 1)
         if argv[index] == flag
     ]
+
+def _application_lib_subject_impl(_ctx):
+    return [ApkInfo()]
+
+application_lib_subject = rule(
+    implementation = _application_lib_subject_impl,
+)
 
 def _android_lint_action_impl(ctx):
     env = analysistest.begin(ctx)
@@ -56,6 +64,8 @@ def _android_lint_action_impl(ctx):
         )
         asserts.equals(env, "DefaultLocale", _argument_value(argv, "--disable-check"))
         asserts.true(env, "--warnings-as-errors" in argv)
+        asserts.false(env, "--library" in argv)
+        asserts.false(env, "--test-sources" in argv)
         asserts.equals(env, target[AndroidLintResultsInfo].output.path, output)
         asserts.false(env, "--baseline-file" in argv)
         asserts.false(env, "--regenerate-baseline-files" in argv)
@@ -119,6 +129,38 @@ _android_lint_action_test = analysistest.make(
         ],
     },
 )
+
+def _android_library_action_impl(ctx):
+    env = analysistest.begin(ctx)
+    actions = [
+        action
+        for action in analysistest.target_actions(env)
+        if action.mnemonic == "AndroidLint"
+    ]
+    asserts.equals(env, 1, len(actions))
+    if actions:
+        argv = actions[0].argv
+        asserts.true(env, "--library" in argv)
+        asserts.false(env, "--test-sources" in argv)
+    return analysistest.end(env)
+
+_android_library_action_test = analysistest.make(_android_library_action_impl)
+
+def _android_test_sources_action_impl(ctx):
+    env = analysistest.begin(ctx)
+    actions = [
+        action
+        for action in analysistest.target_actions(env)
+        if action.mnemonic == "AndroidLint"
+    ]
+    asserts.equals(env, 1, len(actions))
+    if actions:
+        argv = actions[0].argv
+        asserts.true(env, "--library" in argv)
+        asserts.true(env, "--test-sources" in argv)
+    return analysistest.end(env)
+
+_android_test_sources_action_test = analysistest.make(_android_test_sources_action_impl)
 
 def _android_dependency_analysis_impl(ctx):
     env = analysistest.begin(ctx)
@@ -333,6 +375,16 @@ def android_lint_analysis_test_suite(name, additional_tests = []):
         name = action_test,
         target_under_test = ":analysis_fixture_lint",
     )
+    library_action_test = name + "_library_action_test"
+    _android_library_action_test(
+        name = library_action_test,
+        target_under_test = ":analysis_library_fixture_lint",
+    )
+    test_sources_action_test = name + "_test_sources_action_test"
+    _android_test_sources_action_test(
+        name = test_sources_action_test,
+        target_under_test = ":analysis_test_sources_fixture_lint",
+    )
     android_dependency_subject = name + "_android_dependency_subject"
     _android_dependency_subject(
         name = android_dependency_subject,
@@ -367,6 +419,8 @@ def android_lint_analysis_test_suite(name, additional_tests = []):
             ":" + action_test,
             ":" + android_dependency_disabled_test,
             ":" + android_dependency_test,
+            ":" + library_action_test,
             ":" + module_name_collision_test,
+            ":" + test_sources_action_test,
         ] + additional_tests,
     )

@@ -6,12 +6,32 @@ load("//toolchains:toolchain.bzl", "android_lint_toolchain")
 load(
     ":android_lint_analysis_test.bzl",
     "android_lint_analysis_test_suite",
+    "application_lib_subject",
     "dependency_analysis_enabled_lint",
 )
 
 filegroup(
     name = "fixture_lib",
     srcs = ["Fixture.java"],
+)
+
+application_lib_subject(
+    name = "application_fixture_lib",
+)
+
+android_lint(
+    name = "analysis_library_fixture_lint",
+    srcs = ["Fixture.java"],
+    lib = ":fixture_lib",
+    tags = ["manual"],
+)
+
+android_lint(
+    name = "analysis_test_sources_fixture_lint",
+    srcs = ["Fixture.java"],
+    is_test_sources = True,
+    lib = ":fixture_lib",
+    tags = ["manual"],
 )
 
 android_library(
@@ -66,7 +86,7 @@ android_lint(
     srcs = ["Fixture.java"],
     custom_rules = ["@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks"],
     disable_checks = ["DefaultLocale"],
-    lib = ":fixture_lib",
+    lib = ":application_fixture_lib",
     tags = ["manual"],
     warnings_as_errors = True,
     deps = [
