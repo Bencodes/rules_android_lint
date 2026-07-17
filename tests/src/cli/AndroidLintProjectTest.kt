@@ -41,7 +41,7 @@ class AndroidLintProjectTest {
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <project>
         <root dir="{root}"/>
-        <module android="true" name="test_module_name">
+        <module android="true" library="false" name="test_module_name">
           <src file="{root}/Foo.kt"/>
           <resource file="{root}/foo.xml"/>
           <manifest file="{root}/AndroidManifest.xml"/>
@@ -57,7 +57,7 @@ class AndroidLintProjectTest {
   }
 
   @Test
-  fun `analyze mode preserves Android identity without requiring a manifest`() {
+  fun `analyze mode preserves Android library identity without requiring a manifest`() {
     val partialResults = tmpDirectory.newFolder("partial").toPath()
     assertThat(
       createProjectXMLString(
@@ -67,6 +67,7 @@ class AndroidLintProjectTest {
         resources = emptyList(),
         androidManifest = null,
         isAndroid = true,
+        isLibrary = true,
         classpathJars = emptyList(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = emptyList(),
@@ -78,7 +79,7 @@ class AndroidLintProjectTest {
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <project>
         <root dir="{root}"/>
-        <module android="true" name="test_module_name" partial-results-dir="{root}/partial">
+        <module android="true" library="true" name="test_module_name" partial-results-dir="{root}/partial">
           <src file="{root}/Foo.kt"/>
         </module>
       </project>
@@ -109,6 +110,7 @@ class AndroidLintProjectTest {
               name = "dep_a",
               partialResultsDir = depPartial,
               isAndroid = true,
+              isLibrary = true,
             ),
           ),
       ),
@@ -117,7 +119,7 @@ class AndroidLintProjectTest {
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <project>
         <root dir="{root}"/>
-        <module android="false" name="test_module_name" partial-results-dir="{root}/own">
+        <module android="false" library="false" name="test_module_name" partial-results-dir="{root}/own">
           <src file="{root}/Foo.kt"/>
           <dep module="dep_a"/>
         </module>
