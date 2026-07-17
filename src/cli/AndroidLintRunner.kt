@@ -83,6 +83,7 @@ internal class AndroidLintRunner(
               name = name,
               partialResultsDir = dir,
               isAndroid = name in args.androidDependencies,
+              isLibrary = name in args.libraryDependencies,
             )
           },
       )
@@ -246,6 +247,7 @@ internal class AndroidLintRunner(
         resources = args.resources.sortedDescending(),
         androidManifest = args.androidManifest,
         isAndroid = args.isAndroid || args.androidManifest != null,
+        isLibrary = args.isLibrary,
         classpathJars = args.classpath.sortedDescending(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = args.classpathAarPairs,

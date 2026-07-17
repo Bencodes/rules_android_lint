@@ -1,8 +1,13 @@
 load("@rules_android//android:rules.bzl", "android_library")
 load("@rules_java//java:defs.bzl", "java_library")
 load("//rules:defs.bzl", "android_lint")
+load("//tests/integration:lint_report_test.bzl", "lint_report_test")
 load("//toolchains:toolchain.bzl", "android_lint_toolchain")
-load(":android_lint_analysis_test.bzl", "android_lint_analysis_test_suite")
+load(
+    ":android_lint_analysis_test.bzl",
+    "android_lint_analysis_test_suite",
+    "dependency_analysis_enabled_lint",
+)
 
 filegroup(
     name = "fixture_lib",
@@ -56,4 +61,19 @@ android_lint(
     ],
 )
 
-android_lint_analysis_test_suite(name = "tests")
+dependency_analysis_enabled_lint(
+    name = "analysis_fixture_lint_dependency_analysis_enabled",
+    lint = ":analysis_fixture_lint",
+)
+
+lint_report_test(
+    name = "dependency_library_identity_report_test",
+    expected_issues = ["UnusedResources"],
+    lint = ":analysis_fixture_lint_dependency_analysis_enabled",
+    rejected_issues = ["MissingVersion"],
+)
+
+android_lint_analysis_test_suite(
+    name = "tests",
+    additional_tests = [":dependency_library_identity_report_test"],
+)

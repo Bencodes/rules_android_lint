@@ -158,6 +158,8 @@ def _run_android_lint(
             args.add("--dependency-partial-results", "%s=%s" % (dependency.module_name, dependency.partial_results.path))
             if dependency.is_android:
                 args.add("--android-dependency", dependency.module_name)
+            if dependency.is_library:
+                args.add("--library-dependency", dependency.module_name)
             inputs.append(dependency.partial_results)
         args.add("--output", output)
         outputs.append(output)

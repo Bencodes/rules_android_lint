@@ -14,13 +14,15 @@ import kotlin.io.path.pathString
  * A first-party dependency module contributing partial analysis results to the report phase.
  *
  * In the report (`--report-only`) phase lint merges these modules' partial results into the main
- * module's verdict without re-analyzing their sources. Each is registered as a library module
- * carrying its own `partial-results-dir` and linked from the main module via a `<dep>` element.
+ * module's verdict without re-analyzing their sources. Each is registered with its original
+ * module identity, carries its own `partial-results-dir`, and is linked from the main module via a
+ * `<dep>` element.
  */
 internal data class LintDependencyModule(
   val name: String,
   val partialResultsDir: Path,
   val isAndroid: Boolean = false,
+  val isLibrary: Boolean = false,
 )
 
 internal fun createProjectXMLString(
@@ -30,6 +32,7 @@ internal fun createProjectXMLString(
   resources: List<Path>,
   androidManifest: Path?,
   isAndroid: Boolean = androidManifest != null,
+  isLibrary: Boolean = false,
   classpathJars: List<Path>,
   classpathAars: List<Path>,
   classpathExtractedAarDirectories: List<Pair<Path, Path>>,
@@ -55,12 +58,12 @@ internal fun createProjectXMLString(
     document.createElement("module").also {
       it.setAttribute("name", moduleName)
       it.setAttribute("android", isAndroid.toString())
+      it.setAttribute("library", isLibrary.toString())
       // The partial-results-dir is where lint writes results in `--analyze-only` and reads them
       // back in `--report-only`. Absent in the legacy single-shot mode.
       if (partialResultsDir != null) {
         it.setAttribute("partial-results-dir", partialResultsDir.absolutePathString())
       }
-      // it.setAttribute("library", "false")
       // it.setAttribute("compile-sdk-version", "get-actual-value-here")
       projectElement.appendChild(it)
     }
@@ -128,7 +131,7 @@ internal fun createProjectXMLString(
     document.createElement("module").also {
       it.setAttribute("name", dependency.name)
       it.setAttribute("android", dependency.isAndroid.toString())
-      it.setAttribute("library", "true")
+      it.setAttribute("library", dependency.isLibrary.toString())
       it.setAttribute("partial-results-dir", dependency.partialResultsDir.absolutePathString())
       projectElement.appendChild(it)
     }

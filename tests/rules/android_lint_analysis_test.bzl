@@ -44,6 +44,7 @@ def _android_lint_action_impl(ctx):
         output = _argument_value(argv, "--output")
         dependency_partial_results = _argument_values(argv, "--dependency-partial-results")
         android_dependencies = _argument_values(argv, "--android-dependency")
+        library_dependencies = _argument_values(argv, "--library-dependency")
 
         asserts.true(env, module_name != None and module_name.endswith("%3Aanalysis_fixture_lint"))
         asserts.false(env, "/" in module_name)
@@ -78,6 +79,9 @@ def _android_lint_action_impl(ctx):
         if android_dependencies:
             asserts.true(env, android_dependencies[0].endswith("%3Aandroid_dependency"))
             asserts.true(env, android_dependencies[0] in dependency_module_names)
+        asserts.equals(env, 3, len(library_dependencies))
+        for library_dependency in library_dependencies:
+            asserts.true(env, library_dependency in dependency_module_names)
 
         action_inputs = action.inputs.to_list()
         inputs = [file.basename for file in action_inputs]
@@ -114,6 +118,7 @@ def _android_dependency_analysis_impl(ctx):
         analysis = target[_AndroidDependencyAnalysisInfo]
         info = analysis.lint_info
         asserts.true(env, info.is_android)
+        asserts.true(env, info.is_library)
         asserts.true(env, info.partial_results != None)
         asserts.equals(env, "AndroidManifest.xml", info.manifest.basename)
         asserts.true(
@@ -130,8 +135,11 @@ def _android_dependency_analysis_impl(ctx):
             manifest = _argument_value(argv, "--android-manifest")
             android_home = _argument_value(argv, "--android-home")
             module_name = _argument_value(argv, "--label")
+            classpath_aars = _argument_values(argv, "--classpath-aar")
 
             asserts.true(env, "--android" in argv)
+            asserts.true(env, "--library" in argv)
+            asserts.equals(env, 0, len(classpath_aars))
             asserts.true(env, module_name != None and module_name.endswith("%3Aandroid_dependency"))
             asserts.true(env, resource != None and resource.endswith("/res/values/strings.xml"))
             asserts.true(env, manifest != None and manifest.endswith("/AndroidManifest.xml"))
@@ -224,11 +232,46 @@ def _module_name_collision_impl(ctx):
 
 _module_name_collision_test = analysistest.make(_module_name_collision_impl)
 
-def android_lint_analysis_test_suite(name):
+def _dependency_analysis_enabled_transition_impl(_settings, _attr):
+    return {
+        "//command_line_option:extra_toolchains": [
+            "//tests/rules:dependency_analysis_enabled_toolchain",
+        ],
+    }
+
+_dependency_analysis_enabled_transition = transition(
+    implementation = _dependency_analysis_enabled_transition_impl,
+    inputs = [],
+    outputs = ["//command_line_option:extra_toolchains"],
+)
+
+def _dependency_analysis_enabled_lint_impl(ctx):
+    info = ctx.attr.lint[0][AndroidLintResultsInfo]
+    return [
+        info,
+        DefaultInfo(files = depset([info.output])),
+    ]
+
+dependency_analysis_enabled_lint = rule(
+    implementation = _dependency_analysis_enabled_lint_impl,
+    attrs = {
+        "lint": attr.label(
+            cfg = _dependency_analysis_enabled_transition,
+            mandatory = True,
+            providers = [AndroidLintResultsInfo],
+        ),
+        "_allowlist_function_transition": attr.label(
+            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
+        ),
+    },
+)
+
+def android_lint_analysis_test_suite(name, additional_tests = []):
     """Defines the android_lint analysis test suite.
 
     Args:
       name: Name of the generated test suite.
+      additional_tests: Additional test labels to include in the suite.
     """
     action_test = name + "_action_test"
     _android_lint_action_test(
@@ -264,5 +307,5 @@ def android_lint_analysis_test_suite(name):
             ":" + action_test,
             ":" + android_dependency_test,
             ":" + module_name_collision_test,
-        ],
+        ] + additional_tests,
     )

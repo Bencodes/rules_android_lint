@@ -75,6 +75,7 @@ def _lint_analysis_aspect_impl(target, ctx):
     deps = _aspect_deps(ctx)
     transitive = _collect_transitive(deps)
     android_model = _android_model(target)
+    is_library = ctx.rule.kind != "android_binary"
 
     # Skip nodes that have nothing to analyze, but keep propagating the transitive results
     # gathered from their dependencies. Android resource- or manifest-only targets still need an
@@ -87,6 +88,7 @@ def _lint_analysis_aspect_impl(target, ctx):
     ):
         return [_AndroidLintPartialResultsInfo(
             is_android = android_model.is_android,
+            is_library = is_library,
             manifest = android_model.manifest,
             partial_results = None,
             resource_files = android_model.resource_files,
@@ -116,6 +118,8 @@ def _lint_analysis_aspect_impl(target, ctx):
     args.add("--partial-results", partial_results.path)
     if android_model.is_android:
         args.add("--android")
+    if is_library:
+        args.add("--library")
     if toolchain.compile_sdk_version:
         args.add("--compile-sdk-version", toolchain.compile_sdk_version)
     if toolchain.java_language_level:
@@ -144,7 +148,15 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     # AAR dependencies (extracted), so lint loads their classes and embedded lint.jar checks.
     if _AndroidLintAARInfo in target:
-        for node in target[_AndroidLintAARInfo].transitive_aar_artifacts.to_list():
+        aar_info = target[_AndroidLintAARInfo]
+        direct_aar = aar_info.aar.aar
+        for node in aar_info.transitive_aar_artifacts.to_list():
+            # AndroidLibraryAarInfo exposes this target's packaged AAR alongside its dependency
+            # AARs. Feeding that AAR back into its own lint model duplicates its manifest and,
+            # once the project is correctly identified as a library, makes lint attempt an
+            # unsupported library-manifest merge.
+            if direct_aar and node.aar == direct_aar:
+                continue
             if node.aar and node.aar_dir:
                 args.add("--classpath-aar", "%s:%s" % (node.aar.path, node.aar_dir.path))
                 inputs.append(node.aar)
@@ -185,11 +197,13 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     direct = struct(
         is_android = android_model.is_android,
+        is_library = is_library,
         module_name = module_name,
         partial_results = partial_results,
     )
     return [_AndroidLintPartialResultsInfo(
         is_android = android_model.is_android,
+        is_library = is_library,
         manifest = android_model.manifest,
         partial_results = partial_results,
         resource_files = android_model.resource_files,
