@@ -266,6 +266,7 @@ _dependency_analysis_enabled_transition = transition(
 )
 
 def _dependency_analysis_enabled_lint_impl(ctx):
+    # An attribute transition exposes a singleton list even for attr.label.
     info = ctx.attr.lint[0][AndroidLintResultsInfo]
     return [
         info,
@@ -273,6 +274,7 @@ def _dependency_analysis_enabled_lint_impl(ctx):
     ]
 
 dependency_analysis_enabled_lint = rule(
+    doc = "Forwards a lint report built with dependency analysis enabled.",
     implementation = _dependency_analysis_enabled_lint_impl,
     attrs = {
         "lint": attr.label(

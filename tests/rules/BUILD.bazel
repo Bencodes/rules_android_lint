@@ -83,22 +83,32 @@ dependency_analysis_enabled_lint(
 )
 
 lint_report_test(
-    name = "dependency_library_identity_report_test",
-    expected_issues = ["UnusedResources"],
-    lint = ":analysis_fixture_lint_dependency_analysis_enabled",
-    rejected_issues = ["MissingVersion"],
+    name = "dependency_analysis_disabled_report_test",
+    lint = ":analysis_fixture_lint",
+    rejected_issues = [
+        "HardcodedText",
+        "UnusedResources",
+    ],
 )
 
 lint_report_test(
-    name = "runtime_dependency_report_test",
-    expected_issues = ["HardcodedText"],
+    name = "dependency_analysis_enabled_report_test",
+    expected_issues = [
+        "HardcodedText",
+        "UnusedResources",
+    ],
+    expected_location_suffixes = [
+        "tests/rules/fixtures/res/values/strings.xml",
+        "tests/rules/fixtures/runtime/res/layout/runtime.xml",
+    ],
     lint = ":analysis_fixture_lint_dependency_analysis_enabled",
+    rejected_issues = ["MissingVersion"],
 )
 
 android_lint_analysis_test_suite(
     name = "tests",
     additional_tests = [
-        ":dependency_library_identity_report_test",
-        ":runtime_dependency_report_test",
+        ":dependency_analysis_disabled_report_test",
+        ":dependency_analysis_enabled_report_test",
     ],
 )
