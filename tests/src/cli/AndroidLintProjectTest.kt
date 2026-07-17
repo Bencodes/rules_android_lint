@@ -57,7 +57,7 @@ class AndroidLintProjectTest {
   }
 
   @Test
-  fun `analyze mode preserves Android library identity without requiring a manifest`() {
+  fun `analyze mode preserves Android library and test-source identity`() {
     val partialResults = tmpDirectory.newFolder("partial").toPath()
     assertThat(
       createProjectXMLString(
@@ -68,6 +68,7 @@ class AndroidLintProjectTest {
         androidManifest = null,
         isAndroid = true,
         isLibrary = true,
+        isTestSources = true,
         classpathJars = emptyList(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = emptyList(),
@@ -80,7 +81,7 @@ class AndroidLintProjectTest {
       <project>
         <root dir="{root}"/>
         <module android="true" library="true" name="test_module_name" partial-results-dir="{root}/partial">
-          <src file="{root}/Foo.kt"/>
+          <src file="{root}/Foo.kt" test="true"/>
         </module>
       </project>
 

@@ -77,6 +77,7 @@ class AndroidLintRunnerTest {
             "analyze",
             "--android",
             "--library",
+            "--test-sources",
             "--partial-results",
             partialResults.toString(),
             "--src",
@@ -103,7 +104,7 @@ class AndroidLintRunnerTest {
       .contains(
         "<module android=\"true\" library=\"true\" name=\"analyze-test\" " +
           "partial-results-dir=\"${partialResults.toAbsolutePath()}\">",
-      ).contains("<src file=\"$source\"/>")
+      ).contains("<src file=\"$source\" test=\"true\"/>")
       .contains("<resource file=\"$resource\"/>")
       .contains("<manifest file=\"$manifest\"/>")
       .doesNotContain("<dep module=")

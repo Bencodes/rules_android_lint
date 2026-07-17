@@ -4,6 +4,7 @@
 load(
     "@rules_android//providers:providers.bzl",
     "AndroidLibraryResourceClassJarProvider",
+    "ApkInfo",
     "StarlarkAndroidResourcesInfo",
 )
 load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
@@ -27,6 +28,8 @@ def _run_android_lint(
         mode,
         android_lint,
         is_android,
+        is_library,
+        is_test_sources,
         module_name,
         output,
         partial_results,
@@ -57,6 +60,8 @@ def _run_android_lint(
         mode: One of "analyze" (write partial results) or "report" (consume them, emit XML)
         android_lint: The Android Lint binary to use
         is_android: Whether the module is an Android module
+        is_library: Whether the module is a library rather than an application
+        is_test_sources: Whether the module sources are test sources
         module_name: The name of the module
         output: The XML output file (report mode only; None in analyze mode)
         partial_results: The partial-results directory (output in analyze, input in report)
@@ -96,6 +101,10 @@ def _run_android_lint(
     args.add("--mode", mode)
     if is_android:
         args.add("--android")
+    if is_library:
+        args.add("--library")
+    if is_test_sources:
+        args.add("--test-sources")
 
     # The partial-results directory is an output of analyze and an input of report.
     args.add("--partial-results", partial_results.path)
@@ -289,6 +298,8 @@ def process_android_lint_issues(ctx, regenerate):
             manifest != None or
             bool(ctx.files.resource_files)
         ),
+        is_library = ApkInfo not in ctx.attr.lib,
+        is_test_sources = ctx.attr.is_test_sources,
         module_name = module_name,
         srcs = ctx.files.srcs,
         deps = deps_depset,

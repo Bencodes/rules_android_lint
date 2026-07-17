@@ -94,6 +94,7 @@ class AndroidLintActionArgsTest {
             "report",
             "--android",
             "--library",
+            "--test-sources",
             "--partial-results",
             "path/to/partial",
             "--dependency-model",
@@ -112,6 +113,7 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.mode).isEqualTo("report")
     assertThat(parseArgs.isAndroid).isTrue()
     assertThat(parseArgs.isLibrary).isTrue()
+    assertThat(parseArgs.isTestSources).isTrue()
     assertThat(parseArgs.partialResults).isEqualTo(Paths.get("path/to/partial"))
     assertThat(parseArgs.dependencyModels).containsExactly(
       Paths.get("path/to/dep_a/model.json"),
