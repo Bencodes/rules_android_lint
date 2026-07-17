@@ -4,6 +4,7 @@
 load(
     "@rules_android//providers:providers.bzl",
     "AndroidLibraryResourceClassJarProvider",
+    "StarlarkAndroidResourcesInfo",
 )
 load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
 load(
@@ -25,6 +26,7 @@ def _run_android_lint(
         ctx,
         mode,
         android_lint,
+        is_android,
         module_name,
         output,
         partial_results,
@@ -54,6 +56,7 @@ def _run_android_lint(
         ctx: The target context
         mode: One of "analyze" (write partial results) or "report" (consume them, emit XML)
         android_lint: The Android Lint binary to use
+        is_android: Whether the module is an Android module
         module_name: The name of the module
         output: The XML output file (report mode only; None in analyze mode)
         partial_results: The partial-results directory (output in analyze, input in report)
@@ -91,6 +94,8 @@ def _run_android_lint(
     inputs.append(android_lint)
     args.add("--label", module_name)
     args.add("--mode", mode)
+    if is_android:
+        args.add("--android")
 
     # The partial-results directory is an output of analyze and an input of report.
     args.add("--partial-results", partial_results.path)
@@ -151,6 +156,8 @@ def _run_android_lint(
             args.add("--autofix")
         for dependency in dependency_modules:
             args.add("--dependency-partial-results", "%s=%s" % (dependency.module_name, dependency.partial_results.path))
+            if dependency.is_android:
+                args.add("--android-dependency", dependency.module_name)
             inputs.append(dependency.partial_results)
         args.add("--output", output)
         outputs.append(output)
@@ -283,6 +290,11 @@ def process_android_lint_issues(ctx, regenerate):
 
     common = dict(
         android_lint = android_lint,
+        is_android = (
+            StarlarkAndroidResourcesInfo in ctx.attr.lib or
+            manifest != None or
+            bool(ctx.files.resource_files)
+        ),
         module_name = module_name,
         srcs = ctx.files.srcs,
         deps = deps_depset,

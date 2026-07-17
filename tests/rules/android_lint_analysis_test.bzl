@@ -1,7 +1,12 @@
 """Analysis tests for android_lint action and provider wiring."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
-load("//rules:providers.bzl", "AndroidLintResultsInfo")
+load("//rules:lint_analysis_aspect.bzl", "lint_analysis_aspect")
+load(
+    "//rules:providers.bzl",
+    "AndroidLintPartialResultsInfo",
+    "AndroidLintResultsInfo",
+)
 
 def _argument_value(argv, flag):
     for index in range(len(argv)):
@@ -57,6 +62,41 @@ def _android_lint_action_impl(ctx):
 
 _android_lint_action_test = analysistest.make(_android_lint_action_impl)
 
+def _android_dependency_analysis_impl(ctx):
+    env = analysistest.begin(ctx)
+    target = analysistest.target_under_test(env)
+    asserts.true(env, AndroidLintPartialResultsInfo in target)
+    if AndroidLintPartialResultsInfo in target:
+        info = target[AndroidLintPartialResultsInfo]
+        asserts.true(env, info.is_android)
+        asserts.true(env, info.partial_results != None)
+        asserts.equals(env, "AndroidManifest.xml", info.manifest.basename)
+        asserts.true(
+            env,
+            "strings.xml" in [file.basename for file in info.resource_files.to_list()],
+        )
+
+    return analysistest.end(env)
+
+_android_dependency_analysis_test = analysistest.make(_android_dependency_analysis_impl)
+
+def _android_dependency_subject_impl(ctx):
+    info = ctx.attr.dep[AndroidLintPartialResultsInfo]
+    return [
+        DefaultInfo(files = depset([info.partial_results])),
+        info,
+    ]
+
+_android_dependency_subject = rule(
+    implementation = _android_dependency_subject_impl,
+    attrs = {
+        "dep": attr.label(
+            aspects = [lint_analysis_aspect],
+            providers = [AndroidLintPartialResultsInfo],
+        ),
+    },
+)
+
 def android_lint_analysis_test_suite(name):
     """Defines the android_lint analysis test suite.
 
@@ -68,7 +108,20 @@ def android_lint_analysis_test_suite(name):
         name = action_test,
         target_under_test = ":analysis_fixture_lint",
     )
+    android_dependency_subject = name + "_android_dependency_subject"
+    _android_dependency_subject(
+        name = android_dependency_subject,
+        dep = ":android_dependency",
+    )
+    android_dependency_test = name + "_android_dependency_test"
+    _android_dependency_analysis_test(
+        name = android_dependency_test,
+        target_under_test = ":" + android_dependency_subject,
+    )
     native.test_suite(
         name = name,
-        tests = [":" + action_test],
+        tests = [
+            ":" + action_test,
+            ":" + android_dependency_test,
+        ],
     )

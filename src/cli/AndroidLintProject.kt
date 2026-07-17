@@ -20,6 +20,7 @@ import kotlin.io.path.pathString
 internal data class LintDependencyModule(
   val name: String,
   val partialResultsDir: Path,
+  val isAndroid: Boolean = false,
 )
 
 internal fun createProjectXMLString(
@@ -28,6 +29,7 @@ internal fun createProjectXMLString(
   srcs: List<Path>,
   resources: List<Path>,
   androidManifest: Path?,
+  isAndroid: Boolean = androidManifest != null,
   classpathJars: List<Path>,
   classpathAars: List<Path>,
   classpathExtractedAarDirectories: List<Pair<Path, Path>>,
@@ -52,7 +54,7 @@ internal fun createProjectXMLString(
   val moduleElement =
     document.createElement("module").also {
       it.setAttribute("name", moduleName)
-      it.setAttribute("android", if (androidManifest != null) "true" else "false")
+      it.setAttribute("android", isAndroid.toString())
       // The partial-results-dir is where lint writes results in `--analyze-only` and reads them
       // back in `--report-only`. Absent in the legacy single-shot mode.
       if (partialResultsDir != null) {
@@ -125,6 +127,7 @@ internal fun createProjectXMLString(
   dependencyModules.forEach { dependency ->
     document.createElement("module").also {
       it.setAttribute("name", dependency.name)
+      it.setAttribute("android", dependency.isAndroid.toString())
       it.setAttribute("library", "true")
       it.setAttribute("partial-results-dir", dependency.partialResultsDir.absolutePathString())
       projectElement.appendChild(it)

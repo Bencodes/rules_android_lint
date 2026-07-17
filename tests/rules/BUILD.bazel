@@ -1,9 +1,18 @@
+load("@rules_android//android:rules.bzl", "android_library")
 load("//rules:defs.bzl", "android_lint")
 load(":android_lint_analysis_test.bzl", "android_lint_analysis_test_suite")
 
 filegroup(
     name = "fixture_lib",
     srcs = ["Fixture.java"],
+)
+
+android_library(
+    name = "android_dependency",
+    custom_package = "tests.rules.android",
+    manifest = "fixtures/AndroidManifest.xml",
+    resource_files = ["fixtures/res/values/strings.xml"],
+    tags = ["manual"],
 )
 
 android_lint(
