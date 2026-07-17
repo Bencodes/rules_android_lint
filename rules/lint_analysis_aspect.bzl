@@ -70,10 +70,23 @@ def _android_model(target):
     )
 
 def _lint_analysis_aspect_impl(target, ctx):
-    deps = _aspect_deps(ctx)
-    transitive = _collect_transitive(deps)
+    toolchain = _utils.get_android_lint_toolchain(ctx)
     android_model = _android_model(target)
     is_library = ctx.rule.kind != "android_binary"
+
+    if not toolchain.android_lint_enable_check_dependencies:
+        return [_AndroidLintPartialResultsInfo(
+            is_android = android_model.is_android,
+            is_library = is_library,
+            manifest = android_model.manifest,
+            partial_results = None,
+            resource_files = android_model.resource_files,
+            module_name = None,
+            transitive_results = depset(),
+        )]
+
+    deps = _aspect_deps(ctx)
+    transitive = _collect_transitive(deps)
 
     # Skip nodes that have nothing to analyze, but keep propagating the transitive results
     # gathered from their dependencies. Android resource- or manifest-only targets still need an
@@ -94,7 +107,6 @@ def _lint_analysis_aspect_impl(target, ctx):
             transitive_results = depset(transitive = transitive),
         )]
 
-    toolchain = _utils.get_android_lint_toolchain(ctx)
     module_name = _utils.module_name(ctx.label)
     partial_results = ctx.actions.declare_directory("_lint/%s/partial_results" % ctx.label.name)
     android_lint = _utils.only(_utils.list_or_depset_to_list(toolchain.android_lint.files))
