@@ -65,9 +65,10 @@ _android_lint_action_test = analysistest.make(_android_lint_action_impl)
 def _android_dependency_analysis_impl(ctx):
     env = analysistest.begin(ctx)
     target = analysistest.target_under_test(env)
-    asserts.true(env, AndroidLintPartialResultsInfo in target)
-    if AndroidLintPartialResultsInfo in target:
-        info = target[AndroidLintPartialResultsInfo]
+    asserts.true(env, _AndroidDependencyAnalysisInfo in target)
+    if _AndroidDependencyAnalysisInfo in target:
+        analysis = target[_AndroidDependencyAnalysisInfo]
+        info = analysis.lint_info
         asserts.true(env, info.is_android)
         asserts.true(env, info.partial_results != None)
         asserts.equals(env, "AndroidManifest.xml", info.manifest.basename)
@@ -76,23 +77,60 @@ def _android_dependency_analysis_impl(ctx):
             "strings.xml" in [file.basename for file in info.resource_files.to_list()],
         )
 
+        actions = [action for action in analysis.actions if action.mnemonic == "AndroidLintAnalyze"]
+        asserts.equals(env, 1, len(actions))
+        if actions:
+            action = actions[0]
+            argv = action.argv
+            resource = _argument_value(argv, "--resource")
+            manifest = _argument_value(argv, "--android-manifest")
+            android_home = _argument_value(argv, "--android-home")
+
+            asserts.true(env, "--android" in argv)
+            asserts.true(env, resource != None and resource.endswith("/res/values/strings.xml"))
+            asserts.true(env, manifest != None and manifest.endswith("/AndroidManifest.xml"))
+            asserts.true(env, android_home != None and "androidsdk" in android_home)
+
+            inputs = [file.path for file in action.inputs.to_list()]
+            asserts.true(env, any([path.endswith("/res/values/strings.xml") for path in inputs]))
+            asserts.true(env, any([path.endswith("/AndroidManifest.xml") for path in inputs]))
+            asserts.true(
+                env,
+                any([
+                    "/platforms/android-" in path and path.endswith("/android.jar")
+                    for path in inputs
+                ]),
+            )
+
     return analysistest.end(env)
 
 _android_dependency_analysis_test = analysistest.make(_android_dependency_analysis_impl)
 
+_AndroidDependencyAnalysisInfo = provider(
+    "Test-only view of the dependency lint aspect's provider and registered actions.",
+    fields = ["actions", "lint_info"],
+)
+
+def _android_dependency_analysis_aspect_impl(target, _ctx):
+    return [_AndroidDependencyAnalysisInfo(
+        actions = target.actions,
+        lint_info = target[AndroidLintPartialResultsInfo],
+    )]
+
+_android_dependency_analysis_aspect = aspect(
+    implementation = _android_dependency_analysis_aspect_impl,
+    requires = [lint_analysis_aspect],
+)
+
 def _android_dependency_subject_impl(ctx):
-    info = ctx.attr.dep[AndroidLintPartialResultsInfo]
-    return [
-        DefaultInfo(files = depset([info.partial_results])),
-        info,
-    ]
+    return [ctx.attr.dep[_AndroidDependencyAnalysisInfo]]
 
 _android_dependency_subject = rule(
     implementation = _android_dependency_subject_impl,
     attrs = {
         "dep": attr.label(
-            aspects = [lint_analysis_aspect],
-            providers = [AndroidLintPartialResultsInfo],
+            aspects = [_android_dependency_analysis_aspect],
+            providers = [_AndroidDependencyAnalysisInfo],
         ),
     },
 )

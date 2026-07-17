@@ -161,6 +161,7 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     if toolchain.android_home != None:
         args.add("--android-home", toolchain.android_home.label.workspace_root)
+        inputs.extend(toolchain.android_home.files.to_list())
 
     if java_runtime_info:
         args.add("--jdk-home", java_runtime_info.java_home)
