@@ -31,10 +31,6 @@ load(
 # Edges traversed by the analysis aspect, matching collect_aar_outputs_aspect.
 _ANALYSIS_ATTR_ASPECTS = ["deps", "exports", "associates"]
 
-def _module_name(label):
-    """Derives a stable, unique lint module name from a target label."""
-    return ("%s_%s" % (label.package, label.name)).replace("/", "_").replace("-", "_").replace(".", "_").replace(":", "_")
-
 def _aspect_deps(ctx):
     deps = []
     for attr in _ANALYSIS_ATTR_ASPECTS:
@@ -99,7 +95,7 @@ def _lint_analysis_aspect_impl(target, ctx):
         )]
 
     toolchain = _utils.get_android_lint_toolchain(ctx)
-    module_name = _module_name(ctx.label)
+    module_name = _utils.module_name(ctx.label)
     partial_results = ctx.actions.declare_directory("_lint/%s/partial_results" % ctx.label.name)
     android_lint = _utils.only(_utils.list_or_depset_to_list(toolchain.android_lint.files))
     java_runtime_info = ctx.attr._javabase[java_common.JavaRuntimeInfo]
