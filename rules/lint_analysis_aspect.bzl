@@ -109,14 +109,17 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     module_name = _utils.module_name(ctx.label)
     partial_results = ctx.actions.declare_directory("_lint/%s/partial_results" % ctx.label.name)
+    module_model = ctx.actions.declare_file("_lint/%s/module_model.json" % ctx.label.name)
     android_lint = _utils.only(_utils.list_or_depset_to_list(toolchain.android_lint.files))
     java_runtime_info = ctx.attr._javabase[java_common.JavaRuntimeInfo]
 
     inputs = [android_lint]
-    inputs.extend(srcs)
-    inputs.extend(android_model.resource_files.to_list())
+    module_inputs = []
+    module_inputs.extend(srcs)
+    module_inputs.extend(android_model.resource_files.to_list())
     if android_model.manifest:
-        inputs.append(android_model.manifest)
+        module_inputs.append(android_model.manifest)
+    inputs.extend(module_inputs)
 
     args = ctx.actions.args()
     args.set_param_file_format("multiline")
@@ -152,11 +155,14 @@ def _lint_analysis_aspect_impl(target, ctx):
     classpath = [target[JavaInfo].transitive_compile_time_jars]
     if AndroidLibraryResourceClassJarProvider in target:
         classpath.append(target[AndroidLibraryResourceClassJarProvider].jars)
-    for jar in depset(transitive = classpath).to_list():
+    classpath_jars = depset(transitive = classpath).to_list()
+    for jar in classpath_jars:
         args.add("--classpath-jar", jar)
         inputs.append(jar)
+        module_inputs.append(jar)
 
     # AAR dependencies (extracted), so lint loads their classes and embedded lint.jar checks.
+    classpath_aars = []
     if _AndroidLintAARInfo in target:
         aar_info = target[_AndroidLintAARInfo]
         direct_aar = aar_info.aar.aar
@@ -171,6 +177,28 @@ def _lint_analysis_aspect_impl(target, ctx):
                 args.add("--classpath-aar", "%s:%s" % (node.aar.path, node.aar_dir.path))
                 inputs.append(node.aar)
                 inputs.append(node.aar_dir)
+                module_inputs.append(node.aar)
+                module_inputs.append(node.aar_dir)
+                classpath_aars.append({
+                    "aar": node.aar.path,
+                    "extracted": node.aar_dir.path,
+                })
+
+    ctx.actions.write(
+        output = module_model,
+        content = json.encode({
+            "name": module_name,
+            "partialResultsDir": partial_results.path,
+            "isAndroid": android_model.is_android,
+            "isLibrary": is_library,
+            "srcs": [src.path for src in srcs],
+            "resources": [resource.path for resource in android_model.resource_files.to_list()],
+            "androidManifest": android_model.manifest.path if android_model.manifest else None,
+            "classpathJars": [jar.path for jar in classpath_jars],
+            "classpathAars": [],
+            "classpathExtractedAarDirectories": classpath_aars,
+        }),
+    )
 
     if toolchain.android_lint_config:
         config = _utils.only(_utils.list_or_depset_to_list(toolchain.android_lint_config.files))
@@ -208,6 +236,8 @@ def _lint_analysis_aspect_impl(target, ctx):
     direct = struct(
         is_android = android_model.is_android,
         is_library = is_library,
+        inputs = tuple(module_inputs),
+        model = module_model,
         module_name = module_name,
         partial_results = partial_results,
     )

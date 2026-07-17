@@ -116,6 +116,36 @@ class AndroidLintRunnerTest {
     val ownPartialResults = temporaryFolder.newFolder("report-partial-results").toPath()
     val androidDependencyResults = temporaryFolder.newFolder("android-dependency-results").toPath()
     val javaDependencyResults = temporaryFolder.newFolder("java-dependency-results").toPath()
+    val androidDependencySource = temporaryFolder.newFile("AndroidDependency.kt").toPath()
+    val androidDependencyResource = temporaryFolder.newFile("dependency_strings.xml").toPath()
+    val androidDependencyManifest = temporaryFolder.newFile("DependencyManifest.xml").toPath()
+    val androidDependencyClasspath = writeStubLintJar("android-dependency.jar")
+    val androidDependencyAar = temporaryFolder.newFile("android-dependency.aar").toPath()
+    val androidDependencyAarDirectory =
+      temporaryFolder.newFolder("android-dependency-aar").toPath()
+    val dependencyLintRule = androidDependencyAarDirectory.resolve("lint.jar")
+    Files.copy(writeStubLintJar("dependency-lint-rule.jar"), dependencyLintRule)
+    val javaDependencySource = temporaryFolder.newFile("JavaDependency.java").toPath()
+    val androidDependencyModel =
+      writeDependencyModel(
+        name = "android-dependency",
+        partialResults = androidDependencyResults,
+        isAndroid = true,
+        isLibrary = true,
+        srcs = listOf(androidDependencySource),
+        resources = listOf(androidDependencyResource),
+        androidManifest = androidDependencyManifest,
+        classpathJars = listOf(androidDependencyClasspath),
+        classpathAars = listOf(androidDependencyAar to androidDependencyAarDirectory),
+      )
+    val javaDependencyModel =
+      writeDependencyModel(
+        name = "java-dependency",
+        partialResults = javaDependencyResults,
+        isAndroid = false,
+        isLibrary = true,
+        srcs = listOf(javaDependencySource),
+      )
     val output = temporaryFolder.root.toPath().resolve("report.xml")
     val workingDirectory = temporaryFolder.newFolder("report-working").toPath()
     val args =
@@ -128,16 +158,10 @@ class AndroidLintRunnerTest {
             "--library",
             "--partial-results",
             ownPartialResults.toString(),
-            "--dependency-partial-results",
-            "android-dependency=$androidDependencyResults",
-            "--android-dependency",
-            "android-dependency",
-            "--library-dependency",
-            "android-dependency",
-            "--dependency-partial-results",
-            "java-dependency=$javaDependencyResults",
-            "--library-dependency",
-            "java-dependency",
+            "--dependency-model",
+            androidDependencyModel.toString(),
+            "--dependency-model",
+            javaDependencyModel.toString(),
             "--output",
             output.toString(),
             "--warnings-as-errors",
@@ -166,10 +190,20 @@ class AndroidLintRunnerTest {
       .contains("<dep module=\"java-dependency\"/>")
       .contains(
         "<module android=\"true\" library=\"true\" name=\"android-dependency\" " +
-          "partial-results-dir=\"${androidDependencyResults.toAbsolutePath()}\"/>",
-      ).contains(
+          "partial-results-dir=\"${androidDependencyResults.toAbsolutePath()}\">",
+      ).contains("<src file=\"$androidDependencySource\"/>")
+      .contains("<resource file=\"$androidDependencyResource\"/>")
+      .contains("<manifest file=\"$androidDependencyManifest\"/>")
+      .contains("<classpath jar=\"${androidDependencyClasspath.toAbsolutePath()}\"/>")
+      .contains(
+        "<aar extracted=\"${androidDependencyAarDirectory.toAbsolutePath()}\" " +
+          "file=\"${androidDependencyAar.toAbsolutePath()}\"",
+      ).contains("<lint-checks jar=\"${dependencyLintRule.toAbsolutePath()}\"/>")
+      .contains(
         "<module android=\"false\" library=\"true\" name=\"java-dependency\" " +
-          "partial-results-dir=\"${javaDependencyResults.toAbsolutePath()}\"/>",
+          "partial-results-dir=\"${javaDependencyResults.toAbsolutePath()}\">",
+      ).contains(
+        "<src file=\"$javaDependencySource\"/>",
       )
   }
 
@@ -202,7 +236,49 @@ class AndroidLintRunnerTest {
     }
     return jar
   }
+
+  private fun writeDependencyModel(
+    name: String,
+    partialResults: Path,
+    isAndroid: Boolean,
+    isLibrary: Boolean,
+    srcs: List<Path> = emptyList(),
+    resources: List<Path> = emptyList(),
+    androidManifest: Path? = null,
+    classpathJars: List<Path> = emptyList(),
+    classpathAars: List<Pair<Path, Path>> = emptyList(),
+  ): Path {
+    val model = temporaryFolder.newFile("$name-model.json").toPath()
+    val serializedAars =
+      classpathAars.joinToString(prefix = "[", postfix = "]") { (aar, extracted) ->
+        """{"aar": ${aar.toString().jsonString()}, "extracted": ${
+          extracted.toString().jsonString()
+        }}"""
+      }
+    val json =
+      """
+      {
+        "name": ${name.jsonString()},
+        "partialResultsDir": ${partialResults.toString().jsonString()},
+        "isAndroid": $isAndroid,
+        "isLibrary": $isLibrary,
+        "srcs": ${srcs.toJson()},
+        "resources": ${resources.toJson()},
+        "androidManifest": ${androidManifest?.toString()?.jsonString() ?: "null"},
+        "classpathJars": ${classpathJars.toJson()},
+        "classpathAars": [],
+        "classpathExtractedAarDirectories": $serializedAars
+      }
+      """.trimIndent()
+    Files.writeString(model, json)
+    return model
+  }
 }
+
+private fun String.jsonString(): String = "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
+
+private fun List<Path>.toJson(): String =
+  joinToString(prefix = "[", postfix = "]") { it.toString().jsonString() }
 
 private fun List<String>.argumentAfter(argument: String): String {
   val index = indexOf(argument)

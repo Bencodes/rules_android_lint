@@ -60,8 +60,8 @@ def _run_android_lint(
         module_name: The name of the module
         output: The XML output file (report mode only; None in analyze mode)
         partial_results: The partial-results directory (output in analyze, input in report)
-        dependency_modules: List of structs(module_name, partial_results) for first-party deps
-            whose partial results should be merged (report mode only)
+        dependency_modules: List of structs(module_name, partial_results, model, inputs) for
+            first-party deps whose partial results should be merged (report mode only)
         srcs: The source files
         deps: Depset of aars and jars to include on the classpath
         aars: Depset of the aar nodes
@@ -155,12 +155,10 @@ def _run_android_lint(
         if autofix == True:
             args.add("--autofix")
         for dependency in dependency_modules:
-            args.add("--dependency-partial-results", "%s=%s" % (dependency.module_name, dependency.partial_results.path))
-            if dependency.is_android:
-                args.add("--android-dependency", dependency.module_name)
-            if dependency.is_library:
-                args.add("--library-dependency", dependency.module_name)
+            args.add("--dependency-model", dependency.model)
+            inputs.append(dependency.model)
             inputs.append(dependency.partial_results)
+            inputs.extend(dependency.inputs)
         args.add("--output", output)
         outputs.append(output)
 
@@ -198,8 +196,7 @@ def _collect_dependency_modules(ctx):
     """Collects the transitive partial-results modules from the rule's dependencies.
 
     Returns:
-        A deduplicated list of structs(module_name, partial_results) for every analyzed
-        transitive dependency.
+        A deduplicated list of module model structs for every analyzed transitive dependency.
     """
     transitive = []
     for dep in ctx.attr.deps:
