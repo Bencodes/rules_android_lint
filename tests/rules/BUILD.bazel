@@ -1,5 +1,7 @@
 load("@rules_android//android:rules.bzl", "android_library")
+load("@rules_java//java:defs.bzl", "java_library")
 load("//rules:defs.bzl", "android_lint")
+load("//toolchains:toolchain.bzl", "android_lint_toolchain")
 load(":android_lint_analysis_test.bzl", "android_lint_analysis_test_suite")
 
 filegroup(
@@ -15,6 +17,30 @@ android_library(
     tags = ["manual"],
 )
 
+java_library(
+    name = "collision-dep",
+    srcs = ["Fixture.java"],
+    tags = ["manual"],
+)
+
+java_library(
+    name = "collision.dep",
+    srcs = ["Fixture.java"],
+    tags = ["manual"],
+)
+
+android_lint_toolchain(
+    name = "dependency_analysis_enabled",
+    android_home = "@androidsdk//:files",
+    android_lint_enable_check_dependencies = True,
+)
+
+toolchain(
+    name = "dependency_analysis_enabled_toolchain",
+    toolchain = ":dependency_analysis_enabled",
+    toolchain_type = "//toolchains:toolchain_type",
+)
+
 android_lint(
     name = "analysis_fixture_lint",
     srcs = ["Fixture.java"],
@@ -23,6 +49,11 @@ android_lint(
     lib = ":fixture_lib",
     tags = ["manual"],
     warnings_as_errors = True,
+    deps = [
+        ":android_dependency",
+        ":collision.dep",
+        ":collision-dep",
+    ],
 )
 
 android_lint_analysis_test_suite(name = "tests")

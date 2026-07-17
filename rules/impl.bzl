@@ -192,23 +192,6 @@ def _run_android_lint(
         },
     )
 
-def _get_module_name(ctx):
-    """Extracts the module name from the target
-
-    This module name will be embedded in the Android Lint project configuration.
-
-    Args:
-        ctx: The target context
-
-    Returns:
-        A string representing the module name
-    """
-    path = ctx.build_file_path.split("BUILD")[0].replace("/", "_").replace("-", "_").replace(".", "_")
-    name = ctx.attr.name
-    if path:
-        return "%s_%s" % (path.replace("/", "_").replace("-", "_"), ctx.attr.name)
-    return name
-
 def _collect_dependency_modules(ctx):
     """Collects the transitive partial-results modules from the rule's dependencies.
 
@@ -223,9 +206,21 @@ def _collect_dependency_modules(ctx):
     seen = {}
     modules = []
     for node in depset(transitive = transitive).to_list():
-        if node.module_name and node.module_name not in seen:
-            seen[node.module_name] = True
-            modules.append(node)
+        if not node.module_name:
+            continue
+        previous = seen.get(node.module_name)
+        if previous:
+            if previous.partial_results.path != node.partial_results.path:
+                fail(
+                    "Android Lint module ID collision for %s: %s and %s" % (
+                        node.module_name,
+                        previous.partial_results.path,
+                        node.partial_results.path,
+                    ),
+                )
+            continue
+        seen[node.module_name] = node
+        modules.append(node)
     return modules
 
 def process_android_lint_issues(ctx, regenerate):
@@ -283,7 +278,7 @@ def process_android_lint_issues(ctx, regenerate):
 
     toolchain = _utils.get_android_lint_toolchain(ctx)
     android_lint = _utils.only(_utils.list_or_depset_to_list(toolchain.android_lint.files))
-    module_name = _get_module_name(ctx)
+    module_name = _utils.module_name(ctx.label)
     deps_depset = depset(transitive = deps)
     aars_depset = depset(transitive = aars)
     java_runtime_info = ctx.attr._javabase[java_common.JavaRuntimeInfo]
