@@ -19,8 +19,8 @@ AndroidLintPartialResultsInfo = provider(
                            "node had no lintable inputs.",
         "resource_files": "Depset of direct Android resources used for this target's analysis.",
         "module_name": "The lint module name for this target, or None if not analyzed.",
-        "transitive_results": "depset of structs(module_name, partial_results, is_android, " +
-                              "is_library) for this target and all analyzed transitive " +
-                              "dependencies.",
+        "transitive_results": "depset of structs(module_name, partial_results, model, inputs, " +
+                              "is_android, is_library) for this target and all analyzed " +
+                              "transitive dependencies.",
     },
 )

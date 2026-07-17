@@ -18,16 +18,6 @@ internal class AndroidLintActionArgs(
     Pair(Paths.get(aar), Paths.get(aarDir))
   }
 
-  private val argsParserDependencyModuleTransformer: String.() -> Pair<String, Path> = {
-    // Format: <module-name>=<partial-results-dir>. The name is opaque and may itself contain
-    // no '=', so split on the first occurrence only.
-    val separator = this.indexOf('=')
-    require(separator > 0) {
-      "Error: --dependency-partial-results expects <module-name>=<dir>, got: $this"
-    }
-    Pair(this.substring(0, separator), Paths.get(this.substring(separator + 1)))
-  }
-
   val androidLintCliTool: Path by parser.storing(
     names = arrayOf("--android-lint-cli-tool"),
     help = "",
@@ -69,26 +59,12 @@ internal class AndroidLintActionArgs(
       transform = argsParserPathTransformer,
     ).default { null }
 
-  // First-party dependency partial results consumed in report mode, as <module-name>=<dir> pairs.
-  val dependencyPartialResults: List<Pair<String, Path>> by parser
+  // Serialized descriptions of first-party dependency modules consumed in report mode.
+  val dependencyModels: List<Path> by parser
     .adding(
-      names = arrayOf("--dependency-partial-results"),
+      names = arrayOf("--dependency-model"),
       help = "",
-      transform = argsParserDependencyModuleTransformer,
-    ).default { emptyList() }
-
-  // Names of dependency modules whose partial results came from Android projects.
-  val androidDependencies: List<String> by parser
-    .adding(
-      names = arrayOf("--android-dependency"),
-      help = "",
-    ).default { emptyList() }
-
-  // Names of dependency modules whose partial results came from library projects.
-  val libraryDependencies: List<String> by parser
-    .adding(
-      names = arrayOf("--library-dependency"),
-      help = "",
+      transform = argsParserPathTransformer,
     ).default { emptyList() }
 
   val androidHome: String? by parser

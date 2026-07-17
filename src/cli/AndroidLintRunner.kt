@@ -71,21 +71,14 @@ internal class AndroidLintRunner(
       requireNotNull(args.partialResults) { "--partial-results is required in report mode" }
     val baselineFile = stageBaseline(args, workingDirectory)
     val rootDir = rootDir()
+    val dependencyModules = args.dependencyModels.map(::readLintDependencyModule)
     val projectFile =
       writeProjectXml(
         args = args,
         workingDirectory = workingDirectory,
         rootDir = rootDir,
         partialResultsDir = partialResults,
-        dependencyModules =
-          args.dependencyPartialResults.map { (name, dir) ->
-            LintDependencyModule(
-              name = name,
-              partialResultsDir = dir,
-              isAndroid = name in args.androidDependencies,
-              isLibrary = name in args.libraryDependencies,
-            )
-          },
+        dependencyModules = dependencyModules,
       )
 
     val lintArgs =
@@ -105,13 +98,13 @@ internal class AndroidLintRunner(
 
     // When first-party dependency partial results are present, enable check-dependencies so the
     // merge phase reports their incidents (rather than analyzing — the partial results already
-    // exist). Lint reads each dependency module's partial-results-dir instead of its sources.
+    // exist). The full module metadata remains available to detectors during reporting.
     return reportExitCode(
       invoke(
         args,
         lintArgs,
         workingDirectory,
-        enableCheckDependencies = args.dependencyPartialResults.isNotEmpty(),
+        enableCheckDependencies = dependencyModules.isNotEmpty(),
       ),
     )
   }
@@ -225,7 +218,11 @@ internal class AndroidLintRunner(
     partialResultsDir: Path?,
     dependencyModules: List<LintDependencyModule>,
   ): Path {
-    val aarLintRuleJars = collectAarLintRuleJars(args.classpathAarPairs)
+    val aarLintRuleJars =
+      collectAarLintRuleJars(
+        args.classpathAarPairs +
+          dependencyModules.flatMap(LintDependencyModule::classpathExtractedAarDirectories),
+      )
     val projectFile = workingDirectory.resolve("${args.label}_project_config.xml")
     Files.createFile(projectFile)
 
@@ -251,7 +248,7 @@ internal class AndroidLintRunner(
         classpathJars = args.classpath.sortedDescending(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = args.classpathAarPairs,
-        customLintChecks = (args.customChecks + aarLintRuleJars).sortedDescending(),
+        customLintChecks = (args.customChecks + aarLintRuleJars).distinct().sortedDescending(),
         partialResultsDir = partialResultsDir,
         dependencyModules = dependencyModules,
         aarPartialResultsScratchDir = aarPartialResultsScratchDir,

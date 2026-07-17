@@ -42,9 +42,7 @@ def _android_lint_action_impl(ctx):
         custom_rule = _argument_value(argv, "--custom-rule")
         module_name = _argument_value(argv, "--label")
         output = _argument_value(argv, "--output")
-        dependency_partial_results = _argument_values(argv, "--dependency-partial-results")
-        android_dependencies = _argument_values(argv, "--android-dependency")
-        library_dependencies = _argument_values(argv, "--library-dependency")
+        dependency_models = _argument_values(argv, "--dependency-model")
         classpath_aars = _argument_values(argv, "--classpath-aar")
 
         asserts.true(env, module_name != None and module_name.endswith("%3Aanalysis_fixture_lint"))
@@ -62,42 +60,27 @@ def _android_lint_action_impl(ctx):
         asserts.false(env, "--baseline-file" in argv)
         asserts.false(env, "--regenerate-baseline-files" in argv)
 
-        dependency_module_names = [value.split("=")[0] for value in dependency_partial_results]
-        asserts.equals(env, 5, len(dependency_partial_results))
+        asserts.equals(env, 5, len(dependency_models))
         asserts.true(
             env,
-            any([name.endswith("%3Aandroid_dependency") for name in dependency_module_names]),
+            any([model.endswith("/_lint/android_dependency/module_model.json") for model in dependency_models]),
         )
         asserts.true(
             env,
-            any([name.endswith("%3Acollision-dep") for name in dependency_module_names]),
+            any([model.endswith("/_lint/collision-dep/module_model.json") for model in dependency_models]),
         )
         asserts.true(
             env,
-            any([name.endswith("%3Acollision.dep") for name in dependency_module_names]),
+            any([model.endswith("/_lint/collision.dep/module_model.json") for model in dependency_models]),
         )
         asserts.true(
             env,
-            any([name.endswith("%3Aruntime_android_dependency") for name in dependency_module_names]),
+            any([model.endswith("/_lint/runtime_android_dependency/module_model.json") for model in dependency_models]),
         )
         asserts.true(
             env,
-            any([name.endswith("%3Aruntime_parent") for name in dependency_module_names]),
+            any([model.endswith("/_lint/runtime_parent/module_model.json") for model in dependency_models]),
         )
-        asserts.equals(env, 2, len(android_dependencies))
-        asserts.true(
-            env,
-            any([name.endswith("%3Aandroid_dependency") for name in android_dependencies]),
-        )
-        asserts.true(
-            env,
-            any([name.endswith("%3Aruntime_android_dependency") for name in android_dependencies]),
-        )
-        for android_dependency in android_dependencies:
-            asserts.true(env, android_dependency in dependency_module_names)
-        asserts.equals(env, 5, len(library_dependencies))
-        for library_dependency in library_dependencies:
-            asserts.true(env, library_dependency in dependency_module_names)
         asserts.true(
             env,
             any(["runtime_android_dependency.aar:" in aar for aar in classpath_aars]),
@@ -105,16 +88,23 @@ def _android_lint_action_impl(ctx):
 
         action_inputs = action.inputs.to_list()
         inputs = [file.basename for file in action_inputs]
+        input_paths = [file.path for file in action_inputs]
         outputs = [file.basename for file in action.outputs.to_list()]
         asserts.true(env, "Fixture.java" in inputs)
+        asserts.true(env, "strings.xml" in inputs)
+        asserts.true(env, "runtime.xml" in inputs)
         asserts.true(
             env,
             any(["compose-lint-checks" in input and input.endswith(".jar") for input in inputs]),
         )
         asserts.true(env, "analysis_fixture_lint.xml" in outputs)
-        for value in dependency_partial_results:
-            partial_results_path = value.split("=", 1)[1]
-            asserts.true(env, partial_results_path in [file.path for file in action_inputs])
+        asserts.equals(
+            env,
+            5,
+            len([path for path in input_paths if path.endswith("/partial_results")]),
+        )
+        for model in dependency_models:
+            asserts.true(env, model in input_paths)
 
         asserts.equals(env, "1", action.execution_info.get("supports-workers"))
         asserts.equals(env, "1", action.execution_info.get("supports-multiplex-workers"))
@@ -145,6 +135,13 @@ def _android_dependency_analysis_impl(ctx):
             env,
             "strings.xml" in [file.basename for file in info.resource_files.to_list()],
         )
+        transitive_results = info.transitive_results.to_list()
+        asserts.equals(env, 1, len(transitive_results))
+        if transitive_results:
+            asserts.equals(env, "module_model.json", transitive_results[0].model.basename)
+            model_inputs = [file.basename for file in transitive_results[0].inputs]
+            asserts.true(env, "AndroidManifest.xml" in model_inputs)
+            asserts.true(env, "strings.xml" in model_inputs)
 
         actions = [action for action in analysis.actions if action.mnemonic == "AndroidLintAnalyze"]
         asserts.equals(env, 1, len(actions))

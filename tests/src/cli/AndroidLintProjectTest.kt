@@ -92,6 +92,12 @@ class AndroidLintProjectTest {
   fun `report mode preserves dependency Android identity and partial-results-dir`() {
     val ownPartial = tmpDirectory.newFolder("own").toPath()
     val depPartial = tmpDirectory.newFolder("depA").toPath()
+    val depSource = tmpDirectory.newPath("Dep.kt")
+    val depResource = tmpDirectory.newPath("dep_strings.xml")
+    val depManifest = tmpDirectory.newPath("DepAndroidManifest.xml")
+    val depClasspath = tmpDirectory.newPath("Dep.jar")
+    val depAar = tmpDirectory.newPath("Dep.aar")
+    val depExtractedAar = tmpDirectory.newFolder("tmp/unpacked_aars/dep").toPath()
     assertThat(
       createProjectXMLString(
         moduleName = "test_module_name",
@@ -111,6 +117,11 @@ class AndroidLintProjectTest {
               partialResultsDir = depPartial,
               isAndroid = true,
               isLibrary = true,
+              srcs = listOf(depSource),
+              resources = listOf(depResource),
+              androidManifest = depManifest,
+              classpathJars = listOf(depClasspath),
+              classpathExtractedAarDirectories = listOf(depAar to depExtractedAar),
             ),
           ),
       ),
@@ -123,7 +134,13 @@ class AndroidLintProjectTest {
           <src file="{root}/Foo.kt"/>
           <dep module="dep_a"/>
         </module>
-        <module android="true" library="true" name="dep_a" partial-results-dir="{root}/depA"/>
+        <module android="true" library="true" name="dep_a" partial-results-dir="{root}/depA">
+          <src file="{root}/Dep.kt"/>
+          <resource file="{root}/dep_strings.xml"/>
+          <manifest file="{root}/DepAndroidManifest.xml"/>
+          <classpath jar="{root}/Dep.jar"/>
+          <aar extracted="{root}/tmp/unpacked_aars/dep" file="{root}/Dep.aar"/>
+        </module>
       </project>
 
       """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),

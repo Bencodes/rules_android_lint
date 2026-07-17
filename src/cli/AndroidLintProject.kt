@@ -1,7 +1,10 @@
 package com.rules.android.lint.cli
 
+import com.google.gson.Gson
 import java.io.StringWriter
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
@@ -14,16 +17,70 @@ import kotlin.io.path.pathString
  * A first-party dependency module contributing partial analysis results to the report phase.
  *
  * In the report (`--report-only`) phase lint merges these modules' partial results into the main
- * module's verdict without re-analyzing their sources. Each is registered with its original
- * module identity, carries its own `partial-results-dir`, and is linked from the main module via a
- * `<dep>` element.
+ * module's verdict without re-analyzing their sources. Each is registered with the same module
+ * identity and inputs used during analysis, carries its own `partial-results-dir`, and is linked
+ * from the main module via a `<dep>` element.
  */
 internal data class LintDependencyModule(
   val name: String,
   val partialResultsDir: Path,
   val isAndroid: Boolean = false,
   val isLibrary: Boolean = false,
+  val srcs: List<Path> = emptyList(),
+  val resources: List<Path> = emptyList(),
+  val androidManifest: Path? = null,
+  val classpathJars: List<Path> = emptyList(),
+  val classpathAars: List<Path> = emptyList(),
+  val classpathExtractedAarDirectories: List<Pair<Path, Path>> = emptyList(),
 )
+
+private data class SerializedLintDependencyModule(
+  val name: String?,
+  val partialResultsDir: String?,
+  val isAndroid: Boolean,
+  val isLibrary: Boolean,
+  val srcs: List<String>?,
+  val resources: List<String>?,
+  val androidManifest: String?,
+  val classpathJars: List<String>?,
+  val classpathAars: List<String>?,
+  val classpathExtractedAarDirectories: List<SerializedExtractedAar>?,
+)
+
+private data class SerializedExtractedAar(
+  val aar: String?,
+  val extracted: String?,
+)
+
+internal fun readLintDependencyModule(model: Path): LintDependencyModule {
+  val serialized =
+    Gson().fromJson(Files.readString(model), SerializedLintDependencyModule::class.java)
+  return LintDependencyModule(
+    name = requireNotNull(serialized.name) { "Dependency model $model has no name" },
+    partialResultsDir =
+      Paths.get(
+        requireNotNull(serialized.partialResultsDir) {
+          "Dependency model $model has no partialResultsDir"
+        },
+      ),
+    isAndroid = serialized.isAndroid,
+    isLibrary = serialized.isLibrary,
+    srcs = serialized.srcs.orEmpty().map(Paths::get),
+    resources = serialized.resources.orEmpty().map(Paths::get),
+    androidManifest = serialized.androidManifest?.let(Paths::get),
+    classpathJars = serialized.classpathJars.orEmpty().map(Paths::get),
+    classpathAars = serialized.classpathAars.orEmpty().map(Paths::get),
+    classpathExtractedAarDirectories =
+      serialized.classpathExtractedAarDirectories.orEmpty().map { aar ->
+        Paths.get(requireNotNull(aar.aar) { "Dependency model $model has an AAR with no path" }) to
+          Paths.get(
+            requireNotNull(aar.extracted) {
+              "Dependency model $model has an AAR with no extracted directory"
+            },
+          )
+      },
+  )
+}
 
 internal fun createProjectXMLString(
   moduleName: String,
@@ -75,48 +132,17 @@ internal fun createProjectXMLString(
     }
   }
 
-  srcs.forEach { src ->
-    val element = document.createElement("src")
-    element.setAttribute("file", src.pathString)
-    moduleElement.appendChild(element)
-  }
-
-  resources.forEach { res ->
-    val element = document.createElement("resource")
-    element.setAttribute("file", res.pathString)
-    moduleElement.appendChild(element)
-  }
-
-  if (androidManifest != null) {
-    val element = document.createElement("manifest")
-    element.setAttribute("file", androidManifest.pathString)
-    moduleElement.appendChild(element)
-  }
-
-  classpathJars.forEach { jar ->
-    val element = document.createElement("classpath")
-    element.setAttribute("jar", jar.absolutePathString())
-    moduleElement.appendChild(element)
-  }
-
-  classpathAars.forEach { aar ->
-    val element = document.createElement("aar")
-    element.setAttribute("file", aar.absolutePathString())
-    if (aarPartialResultsScratchDir != null) {
-      element.setAttribute("partial-results-dir", aarPartialResultsScratchDir.absolutePathString())
-    }
-    moduleElement.appendChild(element)
-  }
-
-  classpathExtractedAarDirectories.forEach { (aar, unzippedDir) ->
-    val element = document.createElement("aar")
-    element.setAttribute("file", aar.absolutePathString())
-    element.setAttribute("extracted", unzippedDir.absolutePathString())
-    if (aarPartialResultsScratchDir != null) {
-      element.setAttribute("partial-results-dir", aarPartialResultsScratchDir.absolutePathString())
-    }
-    moduleElement.appendChild(element)
-  }
+  appendModuleContents(
+    document = document,
+    moduleElement = moduleElement,
+    srcs = srcs,
+    resources = resources,
+    androidManifest = androidManifest,
+    classpathJars = classpathJars,
+    classpathAars = classpathAars,
+    classpathExtractedAarDirectories = classpathExtractedAarDirectories,
+    aarPartialResultsScratchDir = aarPartialResultsScratchDir,
+  )
 
   // Link the main module to each first-party dependency that contributed partial results, then
   // register those dependencies as library modules carrying their own partial-results-dir.
@@ -128,13 +154,25 @@ internal fun createProjectXMLString(
   }
 
   dependencyModules.forEach { dependency ->
-    document.createElement("module").also {
-      it.setAttribute("name", dependency.name)
-      it.setAttribute("android", dependency.isAndroid.toString())
-      it.setAttribute("library", dependency.isLibrary.toString())
-      it.setAttribute("partial-results-dir", dependency.partialResultsDir.absolutePathString())
-      projectElement.appendChild(it)
-    }
+    val dependencyElement =
+      document.createElement("module").also {
+        it.setAttribute("name", dependency.name)
+        it.setAttribute("android", dependency.isAndroid.toString())
+        it.setAttribute("library", dependency.isLibrary.toString())
+        it.setAttribute("partial-results-dir", dependency.partialResultsDir.absolutePathString())
+        projectElement.appendChild(it)
+      }
+    appendModuleContents(
+      document = document,
+      moduleElement = dependencyElement,
+      srcs = dependency.srcs,
+      resources = dependency.resources,
+      androidManifest = dependency.androidManifest,
+      classpathJars = dependency.classpathJars,
+      classpathAars = dependency.classpathAars,
+      classpathExtractedAarDirectories = dependency.classpathExtractedAarDirectories,
+      aarPartialResultsScratchDir = aarPartialResultsScratchDir,
+    )
   }
 
   return StringWriter()
@@ -145,4 +183,71 @@ internal fun createProjectXMLString(
       transformer.transform(DOMSource(document), StreamResult(this))
     }.buffer
     .toString()
+}
+
+private fun appendModuleContents(
+  document: org.w3c.dom.Document,
+  moduleElement: org.w3c.dom.Element,
+  srcs: List<Path>,
+  resources: List<Path>,
+  androidManifest: Path?,
+  classpathJars: List<Path>,
+  classpathAars: List<Path>,
+  classpathExtractedAarDirectories: List<Pair<Path, Path>>,
+  aarPartialResultsScratchDir: Path?,
+) {
+  srcs.forEach { src ->
+    document.createElement("src").also {
+      it.setAttribute("file", src.pathString)
+      moduleElement.appendChild(it)
+    }
+  }
+
+  resources.forEach { resource ->
+    document.createElement("resource").also {
+      it.setAttribute("file", resource.pathString)
+      moduleElement.appendChild(it)
+    }
+  }
+
+  if (androidManifest != null) {
+    document.createElement("manifest").also {
+      it.setAttribute("file", androidManifest.pathString)
+      moduleElement.appendChild(it)
+    }
+  }
+
+  classpathJars.forEach { jar ->
+    document.createElement("classpath").also {
+      it.setAttribute("jar", jar.absolutePathString())
+      moduleElement.appendChild(it)
+    }
+  }
+
+  classpathAars.forEach { aar ->
+    document.createElement("aar").also {
+      it.setAttribute("file", aar.absolutePathString())
+      if (aarPartialResultsScratchDir != null) {
+        it.setAttribute(
+          "partial-results-dir",
+          aarPartialResultsScratchDir.absolutePathString(),
+        )
+      }
+      moduleElement.appendChild(it)
+    }
+  }
+
+  classpathExtractedAarDirectories.forEach { (aar, unzippedDir) ->
+    document.createElement("aar").also {
+      it.setAttribute("file", aar.absolutePathString())
+      it.setAttribute("extracted", unzippedDir.absolutePathString())
+      if (aarPartialResultsScratchDir != null) {
+        it.setAttribute(
+          "partial-results-dir",
+          aarPartialResultsScratchDir.absolutePathString(),
+        )
+      }
+      moduleElement.appendChild(it)
+    }
+  }
 }
