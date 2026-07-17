@@ -22,6 +22,14 @@ android_library(
     tags = ["manual"],
 )
 
+android_library(
+    name = "runtime_android_dependency",
+    custom_package = "tests.rules.runtime",
+    manifest = "fixtures/AndroidManifest.xml",
+    resource_files = ["fixtures/runtime/res/layout/runtime.xml"],
+    tags = ["manual"],
+)
+
 java_library(
     name = "collision-dep",
     srcs = ["Fixture.java"],
@@ -32,6 +40,13 @@ java_library(
     name = "collision.dep",
     srcs = ["Fixture.java"],
     tags = ["manual"],
+)
+
+java_library(
+    name = "runtime_parent",
+    srcs = ["Fixture.java"],
+    tags = ["manual"],
+    runtime_deps = [":runtime_android_dependency"],
 )
 
 android_lint_toolchain(
@@ -58,6 +73,7 @@ android_lint(
         ":android_dependency",
         ":collision.dep",
         ":collision-dep",
+        ":runtime_parent",
     ],
 )
 
@@ -73,7 +89,16 @@ lint_report_test(
     rejected_issues = ["MissingVersion"],
 )
 
+lint_report_test(
+    name = "runtime_dependency_report_test",
+    expected_issues = ["HardcodedText"],
+    lint = ":analysis_fixture_lint_dependency_analysis_enabled",
+)
+
 android_lint_analysis_test_suite(
     name = "tests",
-    additional_tests = [":dependency_library_identity_report_test"],
+    additional_tests = [
+        ":dependency_library_identity_report_test",
+        ":runtime_dependency_report_test",
+    ],
 )
