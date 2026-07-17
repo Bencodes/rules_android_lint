@@ -78,7 +78,13 @@ internal class AndroidLintRunner(
         rootDir = rootDir,
         partialResultsDir = partialResults,
         dependencyModules =
-          args.dependencyPartialResults.map { (name, dir) -> LintDependencyModule(name, dir) },
+          args.dependencyPartialResults.map { (name, dir) ->
+            LintDependencyModule(
+              name = name,
+              partialResultsDir = dir,
+              isAndroid = name in args.androidDependencies,
+            )
+          },
       )
 
     val lintArgs =
@@ -239,6 +245,7 @@ internal class AndroidLintRunner(
         srcs = args.srcs.sortedDescending(),
         resources = args.resources.sortedDescending(),
         androidManifest = args.androidManifest,
+        isAndroid = args.isAndroid || args.androidManifest != null,
         classpathJars = args.classpath.sortedDescending(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = args.classpathAarPairs,

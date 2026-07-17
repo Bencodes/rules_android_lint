@@ -10,11 +10,13 @@ sources plus its dependencies' compiled artifacts, never on another target's par
 load(
     "@rules_android//providers:providers.bzl",
     "AndroidLibraryResourceClassJarProvider",
+    "StarlarkAndroidResourcesInfo",
 )
 load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
 load(
     ":collect_aar_outputs_aspect.bzl",
     _AndroidLintAARInfo = "AndroidLintAARInfo",
+    _collect_aar_outputs_aspect = "collect_aar_outputs_aspect",
 )
 load(
     ":providers.bzl",
@@ -46,16 +48,52 @@ def _collect_transitive(deps):
         if _AndroidLintPartialResultsInfo in dep
     ]
 
+def _android_model(target):
+    """Returns the direct Android manifest and resources owned by target."""
+    if StarlarkAndroidResourcesInfo not in target:
+        return struct(
+            is_android = False,
+            manifest = None,
+            resource_files = depset(),
+        )
+
+    resources_info = target[StarlarkAndroidResourcesInfo]
+    nodes = (
+        resources_info.direct_resources_nodes.to_list() +
+        resources_info.transitive_resources_nodes.to_list()
+    )
+    own_nodes = [node for node in nodes if node.label == target.label]
+    manifests = [node.manifest for node in own_nodes if node.manifest]
+    if len(manifests) > 1:
+        fail("Expected at most one Android manifest for %s, found %s" % (target.label, manifests))
+
+    return struct(
+        is_android = True,
+        manifest = manifests[0] if manifests else None,
+        resource_files = depset(
+            transitive = [node.resource_files for node in own_nodes],
+        ),
+    )
+
 def _lint_analysis_aspect_impl(target, ctx):
     deps = _aspect_deps(ctx)
     transitive = _collect_transitive(deps)
+    android_model = _android_model(target)
 
-    # Skip nodes that have nothing to analyze (no JavaInfo or no sources), but keep propagating
-    # the transitive results gathered from their dependencies.
+    # Skip nodes that have nothing to analyze, but keep propagating the transitive results
+    # gathered from their dependencies. Android resource- or manifest-only targets still need an
+    # analysis action because many Android lint detectors do not inspect source code.
     srcs = getattr(ctx.rule.files, "srcs", [])
-    if JavaInfo not in target or not srcs:
+    if (
+        ctx.rule.kind == "aar_import" or
+        JavaInfo not in target or
+        not srcs and not android_model.resource_files.to_list() and not android_model.manifest
+    ):
         return [_AndroidLintPartialResultsInfo(
+            is_android = android_model.is_android,
+            manifest = android_model.manifest,
             partial_results = None,
+            resource_files = android_model.resource_files,
             module_name = None,
             transitive_results = depset(transitive = transitive),
         )]
@@ -68,6 +106,9 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     inputs = [android_lint]
     inputs.extend(srcs)
+    inputs.extend(android_model.resource_files.to_list())
+    if android_model.manifest:
+        inputs.append(android_model.manifest)
 
     args = ctx.actions.args()
     args.set_param_file_format("multiline")
@@ -77,6 +118,8 @@ def _lint_analysis_aspect_impl(target, ctx):
     args.add("--label", module_name)
     args.add("--mode", "analyze")
     args.add("--partial-results", partial_results.path)
+    if android_model.is_android:
+        args.add("--android")
     if toolchain.compile_sdk_version:
         args.add("--compile-sdk-version", toolchain.compile_sdk_version)
     if toolchain.java_language_level:
@@ -86,6 +129,13 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     for src in srcs:
         args.add("--src", src)
+    for resource_file in android_model.resource_files.to_list():
+        # A processed Android resource may be a TreeArtifact (for example, data binding output).
+        # Passing its path keeps it as one project resource root rather than expanding its files
+        # into separate command-line arguments.
+        args.add("--resource", resource_file.path)
+    if android_model.manifest:
+        args.add("--android-manifest", android_model.manifest)
 
     # Classpath for symbol resolution: this target's full compile classpath (its own outputs plus
     # its transitive dependencies) and any compiled R classes.
@@ -136,9 +186,16 @@ def _lint_analysis_aspect_impl(target, ctx):
         },
     )
 
-    direct = struct(module_name = module_name, partial_results = partial_results)
-    return [_AndroidLintPartialResultsInfo(
+    direct = struct(
+        is_android = android_model.is_android,
+        module_name = module_name,
         partial_results = partial_results,
+    )
+    return [_AndroidLintPartialResultsInfo(
+        is_android = android_model.is_android,
+        manifest = android_model.manifest,
+        partial_results = partial_results,
+        resource_files = android_model.resource_files,
         module_name = module_name,
         transitive_results = depset(direct = [direct], transitive = transitive),
     )]
@@ -157,6 +214,6 @@ lint_analysis_aspect = aspect(
         ),
     },
     provides = [_AndroidLintPartialResultsInfo],
-    required_aspect_providers = [[_AndroidLintAARInfo]],
+    requires = [_collect_aar_outputs_aspect],
     toolchains = ["//toolchains:toolchain_type"],
 )

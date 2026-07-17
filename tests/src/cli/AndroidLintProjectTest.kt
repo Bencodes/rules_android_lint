@@ -57,7 +57,7 @@ class AndroidLintProjectTest {
   }
 
   @Test
-  fun `analyze mode emits a partial-results-dir on the module`() {
+  fun `analyze mode preserves Android identity without requiring a manifest`() {
     val partialResults = tmpDirectory.newFolder("partial").toPath()
     assertThat(
       createProjectXMLString(
@@ -66,6 +66,7 @@ class AndroidLintProjectTest {
         srcs = listOf(tmpDirectory.newPath("Foo.kt")),
         resources = emptyList(),
         androidManifest = null,
+        isAndroid = true,
         classpathJars = emptyList(),
         classpathAars = emptyList(),
         classpathExtractedAarDirectories = emptyList(),
@@ -77,7 +78,7 @@ class AndroidLintProjectTest {
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <project>
         <root dir="{root}"/>
-        <module android="false" name="test_module_name" partial-results-dir="{root}/partial">
+        <module android="true" name="test_module_name" partial-results-dir="{root}/partial">
           <src file="{root}/Foo.kt"/>
         </module>
       </project>
@@ -87,7 +88,7 @@ class AndroidLintProjectTest {
   }
 
   @Test
-  fun `report mode links dependency modules carrying their own partial-results-dir`() {
+  fun `report mode preserves dependency Android identity and partial-results-dir`() {
     val ownPartial = tmpDirectory.newFolder("own").toPath()
     val depPartial = tmpDirectory.newFolder("depA").toPath()
     assertThat(
@@ -104,7 +105,11 @@ class AndroidLintProjectTest {
         partialResultsDir = ownPartial,
         dependencyModules =
           listOf(
-            LintDependencyModule(name = "dep_a", partialResultsDir = depPartial),
+            LintDependencyModule(
+              name = "dep_a",
+              partialResultsDir = depPartial,
+              isAndroid = true,
+            ),
           ),
       ),
     ).isEqualTo(
@@ -116,7 +121,7 @@ class AndroidLintProjectTest {
           <src file="{root}/Foo.kt"/>
           <dep module="dep_a"/>
         </module>
-        <module library="true" name="dep_a" partial-results-dir="{root}/depA"/>
+        <module android="true" library="true" name="dep_a" partial-results-dir="{root}/depA"/>
       </project>
 
       """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),

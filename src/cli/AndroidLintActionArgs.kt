@@ -48,6 +48,12 @@ internal class AndroidLintActionArgs(
       help = "One of: legacy, analyze, report",
     ).default { "legacy" }
 
+  val isAndroid: Boolean by parser
+    .flagging(
+      names = arrayOf("--android"),
+      help = "Model this project as an Android module.",
+    ).default { false }
+
   // In analyze mode, the directory lint writes partial results into. In report mode, the directory
   // lint reads the module's own partial results from.
   val partialResults: Path? by parser
@@ -63,6 +69,13 @@ internal class AndroidLintActionArgs(
       names = arrayOf("--dependency-partial-results"),
       help = "",
       transform = argsParserDependencyModuleTransformer,
+    ).default { emptyList() }
+
+  // Names of dependency modules whose partial results came from Android projects.
+  val androidDependencies: List<String> by parser
+    .adding(
+      names = arrayOf("--android-dependency"),
+      help = "",
     ).default { emptyList() }
 
   val androidHome: String? by parser

@@ -92,10 +92,13 @@ class AndroidLintActionArgsTest {
             "path/to/cli.jar",
             "--mode",
             "report",
+            "--android",
             "--partial-results",
             "path/to/partial",
             "--dependency-partial-results",
             "dep_a=path/to/dep_a/partial",
+            "--android-dependency",
+            "dep_a",
             "--dependency-partial-results",
             "dep_b=path/to/dep_b/partial",
             "--compile-sdk-version",
@@ -108,11 +111,13 @@ class AndroidLintActionArgsTest {
       )
 
     assertThat(parseArgs.mode).isEqualTo("report")
+    assertThat(parseArgs.isAndroid).isTrue()
     assertThat(parseArgs.partialResults).isEqualTo(Paths.get("path/to/partial"))
     assertThat(parseArgs.dependencyPartialResults).containsExactly(
       "dep_a" to Paths.get("path/to/dep_a/partial"),
       "dep_b" to Paths.get("path/to/dep_b/partial"),
     )
+    assertThat(parseArgs.androidDependencies).containsExactly("dep_a")
     // Output is optional now; absent here.
     assertThat(parseArgs.output).isNull()
   }
