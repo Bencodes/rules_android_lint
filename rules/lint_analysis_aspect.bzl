@@ -15,6 +15,7 @@ load(
 load("@rules_java//java:defs.bzl", "JavaInfo", "java_common")
 load(
     ":collect_aar_outputs_aspect.bzl",
+    _ANDROID_LINT_DEPENDENCY_ATTRS = "ANDROID_LINT_DEPENDENCY_ATTRS",
     _AndroidLintAARInfo = "AndroidLintAARInfo",
     _collect_aar_outputs_aspect = "collect_aar_outputs_aspect",
 )
@@ -28,12 +29,9 @@ load(
     _utils = "utils",
 )
 
-# Edges traversed by the analysis aspect, matching collect_aar_outputs_aspect.
-_ANALYSIS_ATTR_ASPECTS = ["deps", "exports", "associates"]
-
 def _aspect_deps(ctx):
     deps = []
-    for attr in _ANALYSIS_ATTR_ASPECTS:
+    for attr in _ANDROID_LINT_DEPENDENCY_ATTRS:
         deps.extend(getattr(ctx.rule.attr, attr, []))
     return deps
 
@@ -213,7 +211,7 @@ def _lint_analysis_aspect_impl(target, ctx):
 
 lint_analysis_aspect = aspect(
     implementation = _lint_analysis_aspect_impl,
-    attr_aspects = _ANALYSIS_ATTR_ASPECTS,
+    attr_aspects = _ANDROID_LINT_DEPENDENCY_ATTRS,
     attrs = {
         "_lint_wrapper": attr.label(
             default = Label("//src/cli"),

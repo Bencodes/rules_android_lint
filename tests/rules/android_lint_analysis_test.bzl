@@ -45,6 +45,7 @@ def _android_lint_action_impl(ctx):
         dependency_partial_results = _argument_values(argv, "--dependency-partial-results")
         android_dependencies = _argument_values(argv, "--android-dependency")
         library_dependencies = _argument_values(argv, "--library-dependency")
+        classpath_aars = _argument_values(argv, "--classpath-aar")
 
         asserts.true(env, module_name != None and module_name.endswith("%3Aanalysis_fixture_lint"))
         asserts.false(env, "/" in module_name)
@@ -62,7 +63,7 @@ def _android_lint_action_impl(ctx):
         asserts.false(env, "--regenerate-baseline-files" in argv)
 
         dependency_module_names = [value.split("=")[0] for value in dependency_partial_results]
-        asserts.equals(env, 3, len(dependency_partial_results))
+        asserts.equals(env, 5, len(dependency_partial_results))
         asserts.true(
             env,
             any([name.endswith("%3Aandroid_dependency") for name in dependency_module_names]),
@@ -75,13 +76,32 @@ def _android_lint_action_impl(ctx):
             env,
             any([name.endswith("%3Acollision.dep") for name in dependency_module_names]),
         )
-        asserts.equals(env, 1, len(android_dependencies))
-        if android_dependencies:
-            asserts.true(env, android_dependencies[0].endswith("%3Aandroid_dependency"))
-            asserts.true(env, android_dependencies[0] in dependency_module_names)
-        asserts.equals(env, 3, len(library_dependencies))
+        asserts.true(
+            env,
+            any([name.endswith("%3Aruntime_android_dependency") for name in dependency_module_names]),
+        )
+        asserts.true(
+            env,
+            any([name.endswith("%3Aruntime_parent") for name in dependency_module_names]),
+        )
+        asserts.equals(env, 2, len(android_dependencies))
+        asserts.true(
+            env,
+            any([name.endswith("%3Aandroid_dependency") for name in android_dependencies]),
+        )
+        asserts.true(
+            env,
+            any([name.endswith("%3Aruntime_android_dependency") for name in android_dependencies]),
+        )
+        for android_dependency in android_dependencies:
+            asserts.true(env, android_dependency in dependency_module_names)
+        asserts.equals(env, 5, len(library_dependencies))
         for library_dependency in library_dependencies:
             asserts.true(env, library_dependency in dependency_module_names)
+        asserts.true(
+            env,
+            any(["runtime_android_dependency.aar:" in aar for aar in classpath_aars]),
+        )
 
         action_inputs = action.inputs.to_list()
         inputs = [file.basename for file in action_inputs]
