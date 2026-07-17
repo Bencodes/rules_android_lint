@@ -178,7 +178,36 @@ def _android_dependency_analysis_impl(ctx):
 
     return analysistest.end(env)
 
-_android_dependency_analysis_test = analysistest.make(_android_dependency_analysis_impl)
+_android_dependency_analysis_test = analysistest.make(
+    _android_dependency_analysis_impl,
+    config_settings = {
+        "//command_line_option:extra_toolchains": [
+            "//tests/rules:dependency_analysis_enabled_toolchain",
+        ],
+    },
+)
+
+def _android_dependency_analysis_disabled_impl(ctx):
+    env = analysistest.begin(ctx)
+    target = analysistest.target_under_test(env)
+    asserts.true(env, _AndroidDependencyAnalysisInfo in target)
+    if _AndroidDependencyAnalysisInfo in target:
+        analysis = target[_AndroidDependencyAnalysisInfo]
+        info = analysis.lint_info
+        asserts.true(env, info.is_android)
+        asserts.true(env, info.is_library)
+        asserts.equals(env, None, info.partial_results)
+        asserts.equals(env, None, info.module_name)
+        asserts.equals(env, 0, len(info.transitive_results.to_list()))
+
+        actions = [action for action in analysis.actions if action.mnemonic == "AndroidLintAnalyze"]
+        asserts.equals(env, 0, len(actions))
+
+    return analysistest.end(env)
+
+_android_dependency_analysis_disabled_test = analysistest.make(
+    _android_dependency_analysis_disabled_impl,
+)
 
 _AndroidDependencyAnalysisInfo = provider(
     "Test-only view of the dependency lint aspect's provider and registered actions.",
@@ -250,7 +279,14 @@ def _module_name_collision_impl(ctx):
 
     return analysistest.end(env)
 
-_module_name_collision_test = analysistest.make(_module_name_collision_impl)
+_module_name_collision_test = analysistest.make(
+    _module_name_collision_impl,
+    config_settings = {
+        "//command_line_option:extra_toolchains": [
+            "//tests/rules:dependency_analysis_enabled_toolchain",
+        ],
+    },
+)
 
 def _dependency_analysis_enabled_transition_impl(_settings, _attr):
     return {
@@ -310,6 +346,11 @@ def android_lint_analysis_test_suite(name, additional_tests = []):
         name = android_dependency_test,
         target_under_test = ":" + android_dependency_subject,
     )
+    android_dependency_disabled_test = name + "_android_dependency_disabled_test"
+    _android_dependency_analysis_disabled_test(
+        name = android_dependency_disabled_test,
+        target_under_test = ":" + android_dependency_subject,
+    )
     module_names_subject = name + "_module_names_subject"
     _module_names_subject(
         name = module_names_subject,
@@ -327,6 +368,7 @@ def android_lint_analysis_test_suite(name, additional_tests = []):
         name = name,
         tests = [
             ":" + action_test,
+            ":" + android_dependency_disabled_test,
             ":" + android_dependency_test,
             ":" + module_name_collision_test,
         ] + additional_tests,
