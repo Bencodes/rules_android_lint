@@ -62,6 +62,7 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         ":collect_aar_outputs_aspect",
+        ":lint_analysis_aspect",
     ],
 )
 
@@ -104,6 +105,20 @@ bzl_library(
     name = "collect_aar_outputs_aspect",
     srcs = ["collect_aar_outputs_aspect.bzl"],
     visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "lint_analysis_aspect",
+    srcs = ["lint_analysis_aspect.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":collect_aar_outputs_aspect",
+        ":providers",
+        ":utils",
+        "@rules_android//providers:providers_bzl",
+        "@rules_java//java:rules",
+        "@rules_java//java/private:proto_support",
+    ],
 )
 
 filegroup(
