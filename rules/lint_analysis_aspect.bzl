@@ -163,6 +163,7 @@ def _lint_analysis_aspect_impl(target, ctx):
 
     # AAR dependencies (extracted), so lint loads their classes and embedded lint.jar checks.
     classpath_aars = []
+    classpath_aar_nodes = []
     if _AndroidLintAARInfo in target:
         aar_info = target[_AndroidLintAARInfo]
         direct_aar = aar_info.aar.aar
@@ -179,6 +180,7 @@ def _lint_analysis_aspect_impl(target, ctx):
                 inputs.append(node.aar_dir)
                 module_inputs.append(node.aar)
                 module_inputs.append(node.aar_dir)
+                classpath_aar_nodes.append(node)
                 classpath_aars.append({
                     "aar": node.aar.path,
                     "extracted": node.aar_dir.path,
@@ -234,12 +236,17 @@ def _lint_analysis_aspect_impl(target, ctx):
     )
 
     direct = struct(
+        classpath_aars = tuple(classpath_aar_nodes),
+        classpath_jars = tuple(classpath_jars),
         is_android = android_model.is_android,
         is_library = is_library,
         inputs = tuple(module_inputs),
+        manifest = android_model.manifest,
         model = module_model,
         module_name = module_name,
         partial_results = partial_results,
+        resource_files = tuple(android_model.resource_files.to_list()),
+        srcs = tuple(srcs),
     )
     return [_AndroidLintPartialResultsInfo(
         is_android = android_model.is_android,

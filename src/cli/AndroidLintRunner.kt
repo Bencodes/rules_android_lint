@@ -71,7 +71,7 @@ internal class AndroidLintRunner(
       requireNotNull(args.partialResults) { "--partial-results is required in report mode" }
     val baselineFile = stageBaseline(args, workingDirectory)
     val rootDir = rootDir()
-    val dependencyModules = args.dependencyModels.map(::readLintDependencyModule)
+    val dependencyModules = dependencyModules(args)
     val projectFile =
       writeProjectXml(
         args = args,
@@ -256,6 +256,22 @@ internal class AndroidLintRunner(
       ),
     )
     return projectFile
+  }
+
+  /**
+   * Loads dependency module descriptors and pairs them with the partial state produced by analysis
+   * actions owned by this lint target. The descriptor's original path belongs to the
+   * unparameterized aspect and is deliberately not reused.
+   */
+  private fun dependencyModules(args: AndroidLintActionArgs): List<LintDependencyModule> {
+    require(args.dependencyModels.size == args.dependencyPartialResults.size) {
+      "Every --dependency-model requires a --dependency-partial-results"
+    }
+    return args.dependencyModels
+      .map(::readLintDependencyModule)
+      .zip(args.dependencyPartialResults) { dependency, partialResults ->
+        dependency.copy(partialResultsDir = partialResults)
+      }
   }
 
   /**

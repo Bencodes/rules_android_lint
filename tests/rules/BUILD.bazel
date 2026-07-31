@@ -84,8 +84,10 @@ toolchain(
 android_lint(
     name = "analysis_fixture_lint",
     srcs = ["Fixture.java"],
+    android_lint_config = "fixtures/lint.xml",
     custom_rules = ["@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks"],
     disable_checks = ["DefaultLocale"],
+    enable_checks = ["HardcodedText"],
     lib = ":application_fixture_lib",
     tags = ["manual"],
     warnings_as_errors = True,

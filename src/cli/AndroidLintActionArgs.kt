@@ -73,6 +73,14 @@ internal class AndroidLintActionArgs(
       transform = argsParserPathTransformer,
     ).default { emptyList() }
 
+  // Per-model partial results produced by dependency analysis configured for this lint target.
+  val dependencyPartialResults: List<Path> by parser
+    .adding(
+      names = arrayOf("--dependency-partial-results"),
+      help = "",
+      transform = argsParserPathTransformer,
+    ).default { emptyList() }
+
   val androidHome: String? by parser
     .storing(
       names = arrayOf("--android-home"),

@@ -51,6 +51,7 @@ def _android_lint_action_impl(ctx):
         module_name = _argument_value(argv, "--label")
         output = _argument_value(argv, "--output")
         dependency_models = _argument_values(argv, "--dependency-model")
+        dependency_partial_results = _argument_values(argv, "--dependency-partial-results")
         classpath_aars = _argument_values(argv, "--classpath-aar")
 
         asserts.true(env, module_name != None and module_name.endswith("%3Aanalysis_fixture_lint"))
@@ -63,6 +64,8 @@ def _android_lint_action_impl(ctx):
             custom_rule != None and "compose-lint-checks" in custom_rule and custom_rule.endswith(".jar"),
         )
         asserts.equals(env, "DefaultLocale", _argument_value(argv, "--disable-check"))
+        asserts.equals(env, "HardcodedText", _argument_value(argv, "--enable-check"))
+        asserts.true(env, _argument_value(argv, "--config-file").endswith("/fixtures/lint.xml"))
         asserts.true(env, "--warnings-as-errors" in argv)
         asserts.false(env, "--library" in argv)
         asserts.false(env, "--test-sources" in argv)
@@ -71,6 +74,7 @@ def _android_lint_action_impl(ctx):
         asserts.false(env, "--regenerate-baseline-files" in argv)
 
         asserts.equals(env, 5, len(dependency_models))
+        asserts.equals(env, 5, len(dependency_partial_results))
         asserts.true(
             env,
             any([model.endswith("/_lint/android_dependency/module_model.json") for model in dependency_models]),
@@ -108,16 +112,43 @@ def _android_lint_action_impl(ctx):
             any(["compose-lint-checks" in input and input.endswith(".jar") for input in inputs]),
         )
         asserts.true(env, "analysis_fixture_lint.xml" in outputs)
-        asserts.equals(
-            env,
-            5,
-            len([path for path in input_paths if path.endswith("/partial_results")]),
-        )
+        asserts.equals(env, 5, len([path for path in dependency_partial_results if "_lint_dependency_partial_results/" in path]))
         for model in dependency_models:
             asserts.true(env, model in input_paths)
+        for partial_results in dependency_partial_results:
+            asserts.true(env, partial_results in input_paths)
 
         asserts.equals(env, "1", action.execution_info.get("supports-workers"))
         asserts.equals(env, "1", action.execution_info.get("supports-multiplex-workers"))
+
+    analyze_actions = [
+        action
+        for action in analysistest.target_actions(env)
+        if action.mnemonic == "AndroidLintAnalyze"
+    ]
+    asserts.equals(env, 6, len(analyze_actions))
+    if analyze_actions:
+        dependency_actions = [
+            action
+            for action in analyze_actions
+            if not _argument_value(action.argv, "--label").endswith("%3Aanalysis_fixture_lint")
+        ]
+        asserts.equals(env, 5, len(dependency_actions))
+        for action in dependency_actions:
+            argv = action.argv
+            custom_rule = _argument_value(argv, "--custom-rule")
+            asserts.true(
+                env,
+                custom_rule != None and "compose-lint-checks" in custom_rule,
+            )
+            asserts.equals(env, "DefaultLocale", _argument_value(argv, "--disable-check"))
+            asserts.equals(env, "HardcodedText", _argument_value(argv, "--enable-check"))
+            asserts.true(env, _argument_value(argv, "--config-file").endswith("/fixtures/lint.xml"))
+            asserts.equals(env, 1, len([
+                output
+                for output in action.outputs.to_list()
+                if "_lint_dependency_partial_results/" in output.path
+            ]))
 
     return analysistest.end(env)
 

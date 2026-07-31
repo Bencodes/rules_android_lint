@@ -152,7 +152,7 @@ def _run_android_lint(
             inputs.append(aar_dir)
 
     # Report-phase-only arguments: baseline, reporting filters, output, and the dependency
-    # partial results merged into the final verdict.
+    # partial results produced with this android_lint target's check configuration.
     if is_report:
         if not regenerate and baseline:
             args.add("--baseline-file", baseline)
@@ -165,6 +165,7 @@ def _run_android_lint(
             args.add("--autofix")
         for dependency in dependency_modules:
             args.add("--dependency-model", dependency.model)
+            args.add("--dependency-partial-results", dependency.partial_results.path)
             inputs.append(dependency.model)
             inputs.append(dependency.partial_results)
             inputs.extend(dependency.inputs)
@@ -230,6 +231,52 @@ def _collect_dependency_modules(ctx):
         seen[node.module_name] = node
         modules.append(node)
     return modules
+
+def _analyze_dependency_modules(ctx, dependencies, common):
+    """Analyzes dependency modules with the consuming android_lint target's check settings."""
+    configured = []
+    for index, dependency in enumerate(dependencies):
+        partial_results = ctx.actions.declare_directory(
+            "%s_lint_dependency_partial_results/%d" % (ctx.label.name, index),
+        )
+        dependency_common = dict(common)
+        dependency_common.update({
+            "aars": list(dependency.classpath_aars),
+            "deps": list(dependency.classpath_jars),
+            "is_android": dependency.is_android,
+            "is_library": dependency.is_library,
+            "is_test_sources": False,
+            "manifest": dependency.manifest,
+            "module_name": dependency.module_name,
+            "resource_files": list(dependency.resource_files),
+            "srcs": list(dependency.srcs),
+        })
+        _run_android_lint(
+            ctx,
+            mode = "analyze",
+            output = None,
+            partial_results = partial_results,
+            dependency_modules = [],
+            baseline = None,
+            warnings_as_errors = False,
+            autofix = False,
+            regenerate = False,
+            **dependency_common
+        )
+        configured.append(struct(
+            classpath_aars = dependency.classpath_aars,
+            classpath_jars = dependency.classpath_jars,
+            inputs = dependency.inputs,
+            is_android = dependency.is_android,
+            is_library = dependency.is_library,
+            manifest = dependency.manifest,
+            model = dependency.model,
+            module_name = dependency.module_name,
+            partial_results = partial_results,
+            resource_files = dependency.resource_files,
+            srcs = dependency.srcs,
+        ))
+    return configured
 
 def process_android_lint_issues(ctx, regenerate):
     """Runs Android Lint for the given target
@@ -318,6 +365,14 @@ def process_android_lint_issues(ctx, regenerate):
         java_runtime_info = java_runtime_info,
     )
 
+    dependency_modules = []
+    if toolchain.android_lint_enable_check_dependencies:
+        dependency_modules = _analyze_dependency_modules(
+            ctx,
+            _collect_dependency_modules(ctx),
+            common,
+        )
+
     # Analysis phase: analyze this target's own sources, producing partial results.
     own_partial_results = ctx.actions.declare_directory("{}_lint_partial_results".format(ctx.label.name))
     _run_android_lint(
@@ -334,10 +389,6 @@ def process_android_lint_issues(ctx, regenerate):
     )
 
     # Report phase: merge this target's own partial results and, when enabled, the dependencies'.
-    dependency_modules = []
-    if toolchain.android_lint_enable_check_dependencies:
-        dependency_modules = _collect_dependency_modules(ctx)
-
     output = ctx.actions.declare_file("{}.xml".format(ctx.label.name))
     _run_android_lint(
         ctx,
