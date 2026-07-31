@@ -29,6 +29,50 @@ internal class AndroidLintActionArgs(
     help = "",
   )
 
+  // Execution mode. "legacy" runs analysis and reporting in a single invocation (the original
+  // behavior). "analyze" runs `--analyze-only` and writes partial results. "report" runs
+  // `--report-only`, merging the module's own and its dependencies' partial results into a report.
+  val mode: String by parser
+    .storing(
+      names = arrayOf("--mode"),
+      help = "One of: legacy, analyze, report",
+    ).default { "legacy" }
+
+  val isAndroid: Boolean by parser
+    .flagging(
+      names = arrayOf("--android"),
+      help = "Model this project as an Android module.",
+    ).default { false }
+
+  val isLibrary: Boolean by parser
+    .flagging(
+      names = arrayOf("--library"),
+      help = "Model this project as a library module.",
+    ).default { false }
+
+  val isTestSources: Boolean by parser
+    .flagging(
+      names = arrayOf("--test-sources"),
+      help = "Model this project's sources as test sources.",
+    ).default { false }
+
+  // In analyze mode, the directory lint writes partial results into. In report mode, the directory
+  // lint reads the module's own partial results from.
+  val partialResults: Path? by parser
+    .storing(
+      names = arrayOf("--partial-results"),
+      help = "",
+      transform = argsParserPathTransformer,
+    ).default { null }
+
+  // Serialized descriptions of first-party dependency modules consumed in report mode.
+  val dependencyModels: List<Path> by parser
+    .adding(
+      names = arrayOf("--dependency-model"),
+      help = "",
+      transform = argsParserPathTransformer,
+    ).default { emptyList() }
+
   val androidHome: String? by parser
     .storing(
       names = arrayOf("--android-home"),
@@ -48,11 +92,13 @@ internal class AndroidLintActionArgs(
     transform = argsParserPathTransformer,
   )
 
-  val output: Path by parser.storing(
-    names = arrayOf("--output"),
-    help = "",
-    transform = argsParserPathTransformer,
-  )
+  // The XML report output. Required in legacy and report modes; absent in analyze mode.
+  val output: Path? by parser
+    .storing(
+      names = arrayOf("--output"),
+      help = "",
+      transform = argsParserPathTransformer,
+    ).default { null }
 
   val resources: List<Path> by parser
     .adding(
