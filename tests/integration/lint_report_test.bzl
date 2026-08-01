@@ -8,7 +8,6 @@ def lint_report_test(
         name,
         lint,
         expected_issues = [],
-        expected_location_suffixes = [],
         rejected_issues = [],
         **kwargs):
     """Defines a portable Python test that checks an android_lint report.
@@ -17,7 +16,6 @@ def lint_report_test(
         name: Name of the generated test.
         lint: android_lint target whose XML output should be checked.
         expected_issues: Lint issue IDs that must be present.
-        expected_location_suffixes: File path suffixes that must be present in issue locations.
         rejected_issues: Lint issue IDs that must be absent.
         **kwargs: Additional arguments forwarded to py_test.
     """
@@ -27,8 +25,6 @@ def lint_report_test(
     ]
     for issue in expected_issues:
         arguments.extend(["--expect-issue", issue])
-    for suffix in expected_location_suffixes:
-        arguments.extend(["--expect-location-suffix", suffix])
     for issue in rejected_issues:
         arguments.extend(["--reject-issue", issue])
 
