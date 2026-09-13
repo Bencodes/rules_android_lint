@@ -21,7 +21,7 @@ bazel_dep(name = "bazel_worker_java", version = "0.0.11")
 bazel_dep(name = "protobuf", version = "33.4", repo_name = "com_google_protobuf")
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5", dev_dependency = True)
-bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.2", dev_dependency = True)
+bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.4", dev_dependency = True)
 
 android = use_extension(
     "@hermetic_android_toolchains//:extensions.bzl",
