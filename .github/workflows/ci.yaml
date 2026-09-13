@@ -36,7 +36,7 @@ jobs:
       - name: "Running tests //..."
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
-        run: bazel test //... --strategy=AndroidLint=${{ matrix.strategy }}
+        run: bazel test //... --strategy=AndroidLint=${{ matrix.strategy }} --strategy=AndroidLintAnalyze=${{ matrix.strategy }}
   integration-tests:
     strategy:
       matrix:
@@ -58,4 +58,4 @@ jobs:
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel_version }}
         working-directory: ${{ matrix.directory }}
-        run: bazel test //... --strategy=AndroidLint=${{ matrix.strategy }}
+        run: bazel test //... --strategy=AndroidLint=${{ matrix.strategy }} --strategy=AndroidLintAnalyze=${{ matrix.strategy }}

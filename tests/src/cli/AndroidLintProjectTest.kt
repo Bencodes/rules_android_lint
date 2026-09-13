@@ -41,7 +41,7 @@ class AndroidLintProjectTest {
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <project>
         <root dir="{root}"/>
-        <module android="true" name="test_module_name">
+        <module android="true" library="false" name="test_module_name">
           <src file="{root}/Foo.kt"/>
           <resource file="{root}/foo.xml"/>
           <manifest file="{root}/AndroidManifest.xml"/>
@@ -50,6 +50,98 @@ class AndroidLintProjectTest {
           <aar extracted="{root}/tmp/unpacked_aars/bar" file="{root}/Bar.aar"/>
         </module>
         <lint-checks jar="{root}/tmp/unpacked_aars/bar/lint.jar"/>
+      </project>
+
+      """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),
+    )
+  }
+
+  @Test
+  fun `analyze mode preserves Android library and test-source identity`() {
+    val partialResults = tmpDirectory.newFolder("partial").toPath()
+    assertThat(
+      createProjectXMLString(
+        moduleName = "test_module_name",
+        rootDir = tmpDirectory.root.absolutePath,
+        srcs = listOf(tmpDirectory.newPath("Foo.kt")),
+        resources = emptyList(),
+        androidManifest = null,
+        isAndroid = true,
+        isLibrary = true,
+        isTestSources = true,
+        classpathJars = emptyList(),
+        classpathAars = emptyList(),
+        classpathExtractedAarDirectories = emptyList(),
+        customLintChecks = emptyList(),
+        partialResultsDir = partialResults,
+      ),
+    ).isEqualTo(
+      """
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <project>
+        <root dir="{root}"/>
+        <module android="true" library="true" name="test_module_name" partial-results-dir="{root}/partial">
+          <src file="{root}/Foo.kt" test="true"/>
+        </module>
+      </project>
+
+      """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),
+    )
+  }
+
+  @Test
+  fun `report mode preserves dependency Android identity and partial-results-dir`() {
+    val ownPartial = tmpDirectory.newFolder("own").toPath()
+    val depPartial = tmpDirectory.newFolder("depA").toPath()
+    val depSource = tmpDirectory.newPath("Dep.kt")
+    val depResource = tmpDirectory.newPath("dep_strings.xml")
+    val depManifest = tmpDirectory.newPath("DepAndroidManifest.xml")
+    val depClasspath = tmpDirectory.newPath("Dep.jar")
+    val depAar = tmpDirectory.newPath("Dep.aar")
+    val depExtractedAar = tmpDirectory.newFolder("tmp/unpacked_aars/dep").toPath()
+    assertThat(
+      createProjectXMLString(
+        moduleName = "test_module_name",
+        rootDir = tmpDirectory.root.absolutePath,
+        srcs = listOf(tmpDirectory.newPath("Foo.kt")),
+        resources = emptyList(),
+        androidManifest = null,
+        classpathJars = emptyList(),
+        classpathAars = emptyList(),
+        classpathExtractedAarDirectories = emptyList(),
+        customLintChecks = emptyList(),
+        partialResultsDir = ownPartial,
+        dependencyModules =
+          listOf(
+            LintDependencyModule(
+              name = "dep_a",
+              partialResultsDir = depPartial,
+              isAndroid = true,
+              isLibrary = true,
+              srcs = listOf(depSource),
+              resources = listOf(depResource),
+              androidManifest = depManifest,
+              classpathJars = listOf(depClasspath),
+              classpathExtractedAarDirectories = listOf(depAar to depExtractedAar),
+            ),
+          ),
+      ),
+    ).isEqualTo(
+      """
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <project>
+        <root dir="{root}"/>
+        <module android="false" library="false" name="test_module_name" partial-results-dir="{root}/own">
+          <src file="{root}/Foo.kt"/>
+          <dep module="dep_a"/>
+        </module>
+        <module android="true" library="true" name="dep_a" partial-results-dir="{root}/depA">
+          <src file="{root}/Dep.kt"/>
+          <resource file="{root}/dep_strings.xml"/>
+          <manifest file="{root}/DepAndroidManifest.xml"/>
+          <classpath jar="{root}/Dep.jar"/>
+          <aar extracted="{root}/tmp/unpacked_aars/dep" file="{root}/Dep.aar"/>
+        </module>
       </project>
 
       """.trimIndent().replace("{root}", tmpDirectory.root.absolutePath),
