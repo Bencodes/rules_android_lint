@@ -4,7 +4,7 @@ module(
     compatibility_level = 1,
 )
 
-bazel_dep(name = "hermetic_android_toolchains", version = "0.2.0", dev_dependency = True)
+bazel_dep(name = "hermetic_android_toolchains", version = "0.4.0", dev_dependency = True)
 
 bazel_dep(name = "rules_android", version = "0.7.3")
 bazel_dep(name = "rules_java", version = "9.3.0")
