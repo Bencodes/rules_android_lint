@@ -26,9 +26,34 @@ def _list_or_depset_to_list(list_or_depset):
     else:
         return fail("Error: Expected a list or a depset. Got %s" % type(list_or_depset))
 
+def _module_name(label):
+    """Returns an injective, filesystem-safe module ID for a canonical Bazel label.
+
+    Keeping the full label preserves repository, package, and target identity. Percent is escaped
+    first so the remaining replacements are reversible and cannot collide with literal escape
+    sequences in a label.
+    """
+    result = str(label)
+    for character, replacement in [
+        ("%", "%25"),
+        ("/", "%2F"),
+        ("\\", "%5C"),
+        (":", "%3A"),
+        ("=", "%3D"),
+        ("<", "%3C"),
+        (">", "%3E"),
+        ("\"", "%22"),
+        ("|", "%7C"),
+        ("?", "%3F"),
+        ("*", "%2A"),
+    ]:
+        result = result.replace(character, replacement)
+    return result
+
 utils = struct(
     first = _first,
-    only = _only,
-    list_or_depset_to_list = _list_or_depset_to_list,
     get_android_lint_toolchain = _get_android_lint_toolchain,
+    list_or_depset_to_list = _list_or_depset_to_list,
+    module_name = _module_name,
+    only = _only,
 )

@@ -1,9 +1,84 @@
+load("@rules_android//android:rules.bzl", "android_library")
+load("@rules_java//java:defs.bzl", "java_library")
 load("//rules:defs.bzl", "android_lint")
-load(":android_lint_analysis_test.bzl", "android_lint_analysis_test_suite")
+load("//tests/integration:lint_report_test.bzl", "lint_report_test")
+load("//toolchains:toolchain.bzl", "android_lint_toolchain")
+load(
+    ":android_lint_analysis_test.bzl",
+    "android_lint_analysis_test_suite",
+    "application_lib_subject",
+    "dependency_analysis_enabled_lint",
+)
 
 filegroup(
     name = "fixture_lib",
     srcs = ["Fixture.java"],
+)
+
+application_lib_subject(
+    name = "application_fixture_lib",
+)
+
+android_lint(
+    name = "analysis_library_fixture_lint",
+    srcs = ["Fixture.java"],
+    lib = ":fixture_lib",
+    tags = ["manual"],
+)
+
+android_lint(
+    name = "analysis_test_sources_fixture_lint",
+    srcs = ["Fixture.java"],
+    is_test_sources = True,
+    lib = ":fixture_lib",
+    tags = ["manual"],
+)
+
+android_library(
+    name = "android_dependency",
+    custom_package = "tests.rules.android",
+    manifest = "fixtures/AndroidManifest.xml",
+    resource_files = ["fixtures/res/values/strings.xml"],
+    tags = ["manual"],
+)
+
+android_library(
+    name = "runtime_android_dependency",
+    custom_package = "tests.rules.runtime",
+    manifest = "fixtures/AndroidManifest.xml",
+    resource_files = ["fixtures/runtime/res/layout/runtime.xml"],
+    tags = ["manual"],
+)
+
+java_library(
+    name = "collision-dep",
+    srcs = ["Fixture.java"],
+    tags = ["manual"],
+)
+
+java_library(
+    name = "collision.dep",
+    srcs = ["Fixture.java"],
+    tags = ["manual"],
+)
+
+java_library(
+    name = "runtime_parent",
+    srcs = ["Fixture.java"],
+    tags = ["manual"],
+    runtime_deps = [":runtime_android_dependency"],
+)
+
+android_lint_toolchain(
+    name = "dependency_analysis_enabled",
+    android_home = "@androidsdk//:files",
+    android_lint_enable_check_dependencies = True,
+)
+
+toolchain(
+    name = "dependency_analysis_enabled_toolchain",
+    toolchain = ":dependency_analysis_enabled",
+    toolchain_type = "//toolchains:toolchain_type",
 )
 
 android_lint(
@@ -11,9 +86,49 @@ android_lint(
     srcs = ["Fixture.java"],
     custom_rules = ["@rules_android_lint_test_deps//:com_slack_lint_compose_compose_lint_checks"],
     disable_checks = ["DefaultLocale"],
-    lib = ":fixture_lib",
+    lib = ":application_fixture_lib",
     tags = ["manual"],
     warnings_as_errors = True,
+    deps = [
+        ":android_dependency",
+        ":collision.dep",
+        ":collision-dep",
+        ":runtime_parent",
+    ],
 )
 
-android_lint_analysis_test_suite(name = "tests")
+dependency_analysis_enabled_lint(
+    name = "analysis_fixture_lint_dependency_analysis_enabled",
+    lint = ":analysis_fixture_lint",
+)
+
+lint_report_test(
+    name = "dependency_analysis_disabled_report_test",
+    lint = ":analysis_fixture_lint",
+    rejected_issues = [
+        "HardcodedText",
+        "UnusedResources",
+    ],
+)
+
+lint_report_test(
+    name = "dependency_analysis_enabled_report_test",
+    expected_issues = [
+        "HardcodedText",
+        "UnusedResources",
+    ],
+    expected_location_suffixes = [
+        "tests/rules/fixtures/res/values/strings.xml",
+        "tests/rules/fixtures/runtime/res/layout/runtime.xml",
+    ],
+    lint = ":analysis_fixture_lint_dependency_analysis_enabled",
+    rejected_issues = ["MissingVersion"],
+)
+
+android_lint_analysis_test_suite(
+    name = "tests",
+    additional_tests = [
+        ":dependency_analysis_disabled_report_test",
+        ":dependency_analysis_enabled_report_test",
+    ],
+)
