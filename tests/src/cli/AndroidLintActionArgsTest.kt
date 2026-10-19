@@ -76,5 +76,50 @@ class AndroidLintActionArgsTest {
     assertThat(parseArgs.javaLanguageLevel).isEqualTo("1.7")
     assertThat(parseArgs.kotlinLanguageLevel).isEqualTo("1.8")
     assertThat(parseArgs.enableCheckDependencies).isTrue()
+    // Mode defaults to legacy when not specified.
+    assertThat(parseArgs.mode).isEqualTo("legacy")
+  }
+
+  @Test
+  fun `does parse analyze and report mode arguments`() {
+    val parseArgs =
+      AndroidLintActionArgs.parseArgs(
+        args =
+          listOf(
+            "--label",
+            "test",
+            "--android-lint-cli-tool",
+            "path/to/cli.jar",
+            "--mode",
+            "report",
+            "--android",
+            "--library",
+            "--test-sources",
+            "--partial-results",
+            "path/to/partial",
+            "--dependency-model",
+            "path/to/dep_a/model.json",
+            "--dependency-model",
+            "path/to/dep_b/model.json",
+            "--compile-sdk-version",
+            "34",
+            "--java-language-level",
+            "17",
+            "--kotlin-language-level",
+            "1.9",
+          ),
+      )
+
+    assertThat(parseArgs.mode).isEqualTo("report")
+    assertThat(parseArgs.isAndroid).isTrue()
+    assertThat(parseArgs.isLibrary).isTrue()
+    assertThat(parseArgs.isTestSources).isTrue()
+    assertThat(parseArgs.partialResults).isEqualTo(Paths.get("path/to/partial"))
+    assertThat(parseArgs.dependencyModels).containsExactly(
+      Paths.get("path/to/dep_a/model.json"),
+      Paths.get("path/to/dep_b/model.json"),
+    )
+    // Output is optional now; absent here.
+    assertThat(parseArgs.output).isNull()
   }
 }
