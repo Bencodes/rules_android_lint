@@ -36,6 +36,13 @@ common --repo_env=ACCEPTED_ANDROID_SDK_LICENSE_VERSION=34
 
 ### Using a different Android Lint version
 
+Lint 32.5.1 adds a `suppressNames` parameter to `LintXmlConfiguration.IssueData`.
+If your custom check calls the old parameterized constructor or `copy` method,
+rebuild it against 32.5.1 (Java callers can pass `null` for the new parameter).
+Otherwise the precompiled check can fail with `NoSuchMethodError`. Custom checks
+also can no longer rely on the bundled Lint jar to provide `ddmlib`. If you cannot
+update an affected check yet, pin Lint 32.4.1 using the toolchain below.
+
 The lint binary is supplied by the toolchain. To pin your own version, build a deploy jar
 from `com.android.tools.lint:lint` in your own `maven.install(...)` and point the toolchain
 at it:
