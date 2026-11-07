@@ -3,6 +3,11 @@ load("//rules:defs.bzl", "android_lint", "android_lint_test")
 load(":fixture_aar.bzl", "lint_aar_fixture")
 load(":lint_report_test.bzl", "lint_report_test")
 
+exports_files(
+    ["report_assertion.py"],
+    visibility = ["//tests:__subpackages__"],
+)
+
 filegroup(
     name = "basic_clean_lib",
     srcs = ["fixtures/basic/Clean.java"],

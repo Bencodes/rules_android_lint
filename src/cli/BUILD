@@ -16,6 +16,7 @@ kt_jvm_library(
     visibility = ["//visibility:public"],
     deps = [
         "//src/worker",
+        "@rules_android_lint_deps//:com_google_code_gson_gson",
         "@rules_android_lint_deps//:com_xenomachina_kotlin_argparser",
     ],
 )

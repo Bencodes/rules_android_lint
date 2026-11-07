@@ -3,6 +3,8 @@
 
 load("@rules_android//providers:providers.bzl", "AndroidLibraryAarInfo")
 
+ANDROID_LINT_DEPENDENCY_ATTRS = ["deps", "runtime_deps", "exports", "associates"]
+
 AndroidLintAARInfo = provider(
     "A provider to collect all aars from transitive dependencies",
     fields = {
@@ -20,13 +22,13 @@ AndroidLintAARNodeInfo = provider(
 )
 
 def _collect_aar_outputs_aspect(tgt, ctx):
-    deps = getattr(ctx.rule.attr, "deps", [])
-    exports = getattr(ctx.rule.attr, "exports", [])
-    associates = getattr(ctx.rule.attr, "associates", [])
+    deps = []
+    for attr in ANDROID_LINT_DEPENDENCY_ATTRS:
+        deps.extend(getattr(ctx.rule.attr, attr, []))
 
     # Collect the transitive aar artifacts for the given dependencies
     transitive_aar_depsets = []
-    for dep in deps + exports + associates:
+    for dep in deps:
         if AndroidLintAARInfo in dep:
             transitive_aar_depsets.append(dep[AndroidLintAARInfo].transitive_aar_artifacts)
 
@@ -73,5 +75,6 @@ def _collect_aar_outputs_aspect(tgt, ctx):
 
 collect_aar_outputs_aspect = aspect(
     implementation = _collect_aar_outputs_aspect,
-    attr_aspects = ["aar", "deps", "exports", "associates"],
+    attr_aspects = ["aar"] + ANDROID_LINT_DEPENDENCY_ATTRS,
+    provides = [AndroidLintAARInfo],
 )
