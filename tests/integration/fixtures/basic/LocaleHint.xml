@@ -1,0 +1,3 @@
+<lint>
+    <issue id="DefaultLocale" severity="informational"/>
+</lint>
