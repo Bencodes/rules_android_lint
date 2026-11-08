@@ -1,6 +1,8 @@
-load("@rules_android//rules:rules.bzl", "aar_import")
+load("@rules_android//rules:rules.bzl", "aar_import", "android_binary", "android_library")
+load("@rules_java//java:defs.bzl", "java_library")
 load("//rules:defs.bzl", "android_lint", "android_lint_test")
 load(":fixture_aar.bzl", "lint_aar_fixture")
+load(":fixture_manifest.bzl", "processed_manifest")
 load(":lint_report_test.bzl", "lint_report_test")
 
 filegroup(
@@ -146,16 +148,153 @@ lint_report_test(
     lint = ":aar_rules_dirty_lint",
 )
 
+java_library(
+    name = "restricted_api",
+    srcs = glob(["fixtures/restricted/main/**/*.java"]),
+)
+
+java_library(
+    name = "api_caller",
+    srcs = ["fixtures/restricted/test/com/example/TestOnlyApiTest.java"],
+    deps = [":restricted_api"],
+)
+
+android_lint(
+    name = "production_source_lint",
+    srcs = ["fixtures/restricted/test/com/example/TestOnlyApiTest.java"],
+    android_lint_config = "fixtures/restricted/lint.xml",
+    lib = ":api_caller",
+    warnings_as_errors = True,
+    deps = [":restricted_api"],
+)
+
+lint_report_test(
+    name = "production_source_report_test",
+    expected_issues = [
+        "DefaultLocale",
+        "RestrictedApi",
+    ],
+    lint = ":production_source_lint",
+    rejected_issues = ["LintError"],
+)
+
+android_lint(
+    name = "test_source_lint",
+    srcs = ["fixtures/restricted/test/com/example/TestOnlyApiTest.java"],
+    android_lint_config = "fixtures/restricted/lint.xml",
+    is_test_sources = True,
+    lib = ":api_caller",
+    warnings_as_errors = True,
+    deps = [":restricted_api"],
+)
+
+lint_report_test(
+    name = "test_source_report_test",
+    expected_issues = ["DefaultLocale"],
+    lint = ":test_source_lint",
+    rejected_issues = [
+        "LintError",
+        "RestrictedApi",
+    ],
+)
+
+android_library(
+    name = "manifest_library",
+    custom_package = "com.example.manifest",
+    manifest = "fixtures/manifest/AndroidManifest.xml",
+    tags = ["manual"],
+)
+
+android_binary(
+    name = "manifest_app",
+    custom_package = "com.example.manifest",
+    manifest = "fixtures/manifest/AndroidManifest.xml",
+    manifest_values = {"targetSdkVersion": "34"},
+    tags = ["manual"],
+)
+
+android_lint(
+    name = "app_lint",
+    srcs = [],
+    lib = ":manifest_app",
+    manifest = "fixtures/manifest/AndroidManifest.xml",
+    resource_files = ["fixtures/manifest/res/layout/login.xml"],
+    warnings_as_errors = True,
+)
+
+lint_report_test(
+    name = "app_report_test",
+    expected_issues = [
+        "MissingVersion",
+        "UnusedResources",
+    ],
+    lint = ":app_lint",
+    rejected_issues = ["LintError"],
+)
+
+android_lint(
+    name = "library_lint",
+    srcs = [],
+    lib = ":manifest_library",
+    manifest = "fixtures/manifest/AndroidManifest.xml",
+    resource_files = ["fixtures/manifest/res/layout/login.xml"],
+    warnings_as_errors = True,
+)
+
+lint_report_test(
+    name = "library_report_test",
+    lint = ":library_lint",
+    rejected_issues = [
+        "LintError",
+        "MissingVersion",
+        "UnusedResources",
+    ],
+)
+
+processed_manifest(
+    name = "app_processed_manifest",
+    app = ":manifest_app",
+)
+
+android_lint(
+    name = "processed_manifest_lint",
+    srcs = [],
+    lib = ":manifest_app",
+    manifest = ":app_processed_manifest",
+    resource_files = ["fixtures/manifest/res/layout/login.xml"],
+    warnings_as_errors = True,
+)
+
+lint_report_test(
+    name = "processed_manifest_report_test",
+    expected_issues = ["Autofill"],
+    lint = ":processed_manifest_lint",
+    rejected_issues = ["LintError"],
+)
+
+lint_report_test(
+    name = "app_target_sdk_report_test",
+    expected_issues = ["Autofill"],
+    lint = ":app_lint",
+    rejected_issues = ["LintError"],
+)
+
 test_suite(
     name = "tests",
     tests = [
         ":aar_rules_clean_test",
         ":aar_rules_dirty_report_test",
+        ":app_report_test",
+        ":app_target_sdk_report_test",
         ":basic_baseline_test",
         ":basic_clean_test",
         ":basic_dirty_report_test",
         ":basic_disabled_check_test",
         ":custom_rules_clean_test",
         ":custom_rules_dirty_report_test",
+        ":library_report_test",
+        ":processed_manifest_report_test",
+        ":production_source_report_test",
+        ":test_source_report_test",
     ],
 )
